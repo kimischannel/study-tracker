@@ -90,6 +90,11 @@ body {
   white-space: nowrap;
 }
 .visit-table tr:hover td { background: #f9fafb; }
+.user-avatar {
+  width: 32px; height: 32px; border-radius: 50%; display: inline-flex;
+  align-items: center; justify-content: center; font-weight: 800;
+  font-size: 14px; color: #fff;
+}
 .badge {
   display: inline-block; padding: 2px 10px; border-radius: 12px;
   font-size: 12px; font-weight: 600;
@@ -139,9 +144,13 @@ body {
 
     <div class="refresh-bar">
       <span class="last-update" id="lastUpdate"></span>
-      <button class="btn-refresh" id="btnRefresh">🔄 刷新数据</button>
+      <div style="display:flex;gap:4px;background:#f1f5f9;border-radius:12px;padding:3px">
+        <button class="tab-btn active" data-tab="data" style="padding:6px 14px;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;background:#fff;color:#0f172a">📊 数据</button>
+        <button class="tab-btn" data-tab="users" style="padding:6px 14px;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;background:none;color:#64748b">👥 用户</button>
+      </div>
     </div>
 
+    <div id="tabData">
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon">☀️</div>
@@ -189,6 +198,23 @@ body {
         </table>
       </div>
     </div>
+    </div><!-- end tabData -->
+
+    <div id="tabUsers" style="display:none">
+      <div class="stats-grid" style="grid-template-columns: repeat(2,1fr)">
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="totalUsers">-</div><div class="stat-label">注册用户</div></div>
+        <div class="stat-card"><div class="stat-icon">📱</div><div class="stat-value" id="mobileUsers">-</div><div class="stat-label">手机用户</div></div>
+      </div>
+      <div class="card"><div class="card-title">所有用户</div>
+        <div style="overflow-x:auto">
+          <table class="visit-table">
+            <thead><tr><th>头像</th><th>名字</th><th>手机号</th><th>设备</th><th>注册时间</th></tr></thead>
+            <tbody id="userTableBody"><tr><td colspan="5" class="loading">加载中...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -228,6 +254,18 @@ document.getElementById('btnLogout').addEventListener('click', () => {
 });
 
 document.getElementById('btnRefresh').addEventListener('click', loadDashboard);
+
+// ── Tab switching ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => { b.style.background = 'none'; b.style.color = '#64748b'; });
+    btn.style.background = '#fff'; btn.style.color = '#0f172a';
+    const tab = btn.dataset.tab;
+    document.getElementById('tabData').style.display = tab === 'data' ? '' : 'none';
+    document.getElementById('tabUsers').style.display = tab === 'users' ? '' : 'none';
+    if (tab === 'users') loadUsers();
+  });
+});
 
 // ── Data ──
 async function loadDashboard() {
@@ -390,6 +428,47 @@ function renderTable(visits) {
         <td>${esc(v.screen_size || '-')}</td>
       </tr>`;
   }).join('');
+}
+
+// ── Users ──
+const AVATAR_COLORS = ['#059669','#3b82f6','#8b5cf6','#e11d48','#ea580c','#0891b2','#7c3aed','#be185d'];
+function avatarColor(name) {
+  let h = 0; for (let i = 0; i < name.length; i++) h = ((h << 5) - h) + name.charCodeAt(i);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+
+async function loadUsers() {
+  try {
+    const resp = await fetch(SUPABASE_URL + '/rest/v1/users?select=*&order=created_at.desc&limit=200', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    const users = await resp.json();
+    if (!Array.isArray(users)) return;
+
+    document.getElementById('totalUsers').textContent = users.length;
+    const mobile = users.filter(u => u.device_info && (u.device_info.includes('Android') || u.device_info.includes('iOS')));
+    document.getElementById('mobileUsers').textContent = mobile.length;
+
+    const tbody = document.getElementById('userTableBody');
+    if (users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">暂无注册用户</td></tr>';
+      return;
+    }
+    tbody.innerHTML = users.map(u => {
+      const initial = (u.name || '?').charAt(0);
+      const color = avatarColor(u.name || '');
+      const time = u.created_at ? new Date(u.created_at).toLocaleString('zh-CN', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
+      const device = u.device_info || '-';
+      const deviceShort = device.length > 30 ? device.slice(0, 30) + '...' : device;
+      return `<tr>
+        <td><span class="user-avatar" style="background:${color}">${initial}</span></td>
+        <td style="font-weight:700">${esc(u.name || '')}</td>
+        <td style="color:var(--muted)">${esc(u.phone || '')}</td>
+        <td style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis" title="${esc(device)}">${esc(deviceShort)}</td>
+        <td style="font-size:12px;color:var(--muted)">${time}</td>
+      </tr>`;
+    }).join('');
+  } catch (e) { console.error(e); }
 }
 
 function esc(s) {

@@ -246,8 +246,11 @@ body {
 <div class="app">
   <!-- Header -->
   <div class="header">
-    <h1>学习计时</h1>
-    <div class="sub">记录每一刻专注</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px">
+      <div id="userAvatar" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;color:#fff;flex-shrink:0"></div>
+      <h1 style="margin:0">学习计时</h1>
+    </div>
+    <div class="sub"><span id="userName"></span> · <a href="#" id="btnLogout" style="color:var(--c-muted);text-decoration:none;font-size:0.75rem">退出</a></div>
   </div>
 
   <!-- Timer -->
@@ -328,6 +331,24 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
+// ── Auth check ──
+const currentUser = JSON.parse(sessionStorage.getItem('user'));
+if (!currentUser) { location.href = 'login.html'; }
+
+// ── User display ──
+const AVATAR_COLORS = ['#059669','#3b82f6','#8b5cf6','#e11d48','#ea580c','#0891b2','#7c3aed','#be185d'];
+function initUser() {
+  const name = currentUser.name || '?';
+  const initial = name.charAt(0);
+  const color = AVATAR_COLORS[Math.abs([...name].reduce((h,c)=>((h<<5)-h)+c.charCodeAt(0),0)) % AVATAR_COLORS.length];
+  const av = document.getElementById('userAvatar');
+  av.style.background = color;
+  av.textContent = initial;
+  document.getElementById('userName').textContent = name;
+}
+initUser();
+document.getElementById('btnLogout').addEventListener('click', e => { e.preventDefault(); sessionStorage.clear(); location.href = 'login.html'; });
+
 // ── Data layer ──
 const STORAGE_KEY = 'study-tracker-data';
 const RING_CIRCUMFERENCE = 2 * Math.PI * 96;
@@ -406,7 +427,9 @@ function stop() {
     subject: document.getElementById('subject').value.trim()||'未命名',
     startTime: new Date(now - ms).toISOString(),
     endTime: now.toISOString(),
-    duration: Math.round(ms / 1000)
+    duration: Math.round(ms / 1000),
+    user_id: currentUser.id,
+    user_name: currentUser.name
   });
   save(data);
   pausedMs = 0; phaseStart = null; tick(); setUI(false); refreshAll();
@@ -558,7 +581,7 @@ window.addEventListener('resize',()=>{if(document.getElementById('statsPanel').s
   let vid=localStorage.getItem('svid');
   if(!vid){vid=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2,10);localStorage.setItem('svid',vid);}
   const ua=navigator.userAgent,isM=/Mobi|Android|iPhone/i.test(ua),isT=/iPad|Tablet/i.test(ua)||(isM&&window.innerWidth>768);
-  fetch(SUPABASE_URL+'/rest/v1/visits',{method:'POST',headers:{'Content-Type':'application/json',apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,Prefer:'return=minimal'},body:JSON.stringify({page:window.location.pathname,referrer:document.referrer||'直接访问',user_agent:(isT?'平板':isM?'手机':'电脑')+' | '+(ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0]||'其他浏览器'),screen_size:window.innerWidth+'x'+window.innerHeight,visitor_id:vid})}).catch(()=>{});
+  fetch(SUPABASE_URL+'/rest/v1/visits',{method:'POST',headers:{'Content-Type':'application/json',apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,Prefer:'return=minimal'},body:JSON.stringify({page:window.location.pathname,referrer:document.referrer||'直接访问',user_agent:(isT?'平板':isM?'手机':'电脑')+' | '+(ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0]||'其他浏览器'),screen_size:window.innerWidth+'x'+window.innerHeight,visitor_id:vid,user_id:currentUser?currentUser.id:null})}).catch(()=>{});
 })();
 </script>
 </body>
