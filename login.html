@@ -7,25 +7,22 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --c-green: #059669; --c-green-hover: #047857; --c-green-light: #ecfdf5;
-  --c-red: #ef4444; --c-bg: #f8fafc; --c-card: #fff; --c-text: #0f172a;
-  --c-muted: #64748b; --c-border: #e2e8f0;
-  --radius-lg: 20px; --radius-md: 14px;
-  --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+  --green: #059669; --green-hover: #047857; --red: #ef4444;
+  --bg: #f8fafc; --card: #fff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0;
 }
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: #f8fafc;
   background-image: radial-gradient(ellipse 80% 50% at 50% -20%, #d1fae5 0%, transparent 60%);
-  color: var(--c-text); min-height: 100vh;
+  color: var(--text); min-height: 100vh;
   display: flex; justify-content: center; align-items: center;
   padding: 24px; -webkit-font-smoothing: antialiased;
 }
-.login-box {
-  width: 100%; max-width: 400px; background: var(--c-card);
-  border-radius: var(--radius-lg); padding: 40px 32px 36px;
-  box-shadow: var(--shadow-card); border: 1px solid #f1f5f9;
-  text-align: center;
+.login-wrap {
+  width: 100%; max-width: 400px; background: var(--card);
+  border-radius: 20px; padding: 40px 32px 36px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+  border: 1px solid #f1f5f9; text-align: center;
 }
 .logo {
   width: 64px; height: 64px; border-radius: 18px;
@@ -33,37 +30,37 @@ body {
   display: inline-flex; align-items: center; justify-content: center;
   font-size: 2rem; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(5,150,105,0.25);
 }
-.login-box h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.03em; }
-.login-box .sub { font-size: 0.85rem; color: var(--c-muted); margin-bottom: 28px; }
+.login-wrap h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.03em; }
+.login-wrap .sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 28px; }
 
 .field { margin-bottom: 16px; text-align: left; }
-.field label { font-size: 0.8rem; font-weight: 700; color: var(--c-muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.field label { font-size: 0.8rem; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
 .field input {
-  width: 100%; padding: 12px 16px; border: 1.5px solid var(--c-border);
+  width: 100%; padding: 12px 16px; border: 1.5px solid var(--border);
   border-radius: 12px; font-size: 1rem; outline: none; transition: all 0.2s;
-  background: #fafbfc; font-weight: 500;
+  background: #fafbfc; font-weight: 500; color: var(--text);
 }
-.field input:focus { border-color: var(--c-green); box-shadow: 0 0 0 4px rgba(5,150,105,0.1); background: #fff; }
+.field input:focus { border-color: var(--green); box-shadow: 0 0 0 4px rgba(5,150,105,0.1); background: #fff; }
 
 .btn {
   width: 100%; padding: 13px; border-radius: 14px; font-size: 1rem; font-weight: 700;
-  border: none; cursor: pointer; transition: all 0.2s; margin-top: 8px;
-  letter-spacing: -0.01em;
+  border: none; cursor: pointer; transition: all 0.2s; margin-top: 8px; letter-spacing: -0.01em;
 }
-.btn-primary { background: var(--c-green); color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.25); }
-.btn-primary:hover { background: var(--c-green-hover); }
-.btn-primary:active { transform: scale(0.97); }
+.btn-primary { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.25); }
+.btn-primary:hover:not(:disabled) { background: var(--green-hover); }
+.btn-primary:active:not(:disabled) { transform: scale(0.97); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-ghost {
-  background: none; color: var(--c-muted); font-size: 0.85rem;
-  margin-top: 12px; padding: 8px;
+  background: none; color: var(--muted); font-size: 0.85rem; margin-top: 12px; padding: 8px;
 }
-.btn-ghost:hover { color: var(--c-text); }
-.error-msg { color: var(--c-red); font-size: 0.8rem; margin-top: 10px; display: none; }
-.extra-fields { display: none; }
+.btn-ghost:hover { color: var(--text); }
+.error-msg { color: var(--red); font-size: 0.8rem; margin-top: 10px; display: none; }
+
+#extraFields { display: none; }
 </style>
 </head>
 <body>
-<div class="login-box">
+<div class="login-wrap">
   <div class="logo">📖</div>
   <h1 id="modeTitle">登录</h1>
   <div class="sub" id="modeSub">使用手机号登录学习计时</div>
@@ -73,7 +70,7 @@ body {
     <input type="tel" id="phone" placeholder="输入手机号" maxlength="11" autocomplete="tel">
   </div>
 
-  <div id="extraFields" class="extra-fields">
+  <div id="extraFields">
     <div class="field">
       <label>你的名字</label>
       <input type="text" id="name" placeholder="输入你的名字" maxlength="20" autocomplete="name">
@@ -82,7 +79,7 @@ body {
 
   <div class="field">
     <label>密码</label>
-    <input type="password" id="password" placeholder="输入密码" autocomplete="current-password">
+    <input type="password" id="password" placeholder="输入密码（至少4位）" autocomplete="current-password">
   </div>
 
   <button class="btn btn-primary" id="btnSubmit">登 录</button>
@@ -94,93 +91,129 @@ body {
 const SUPABASE_URL = 'https://fdldkejfkvcymlzcmeub.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_0r9JoiUqOggGX7Cum1gjtQ_WEkBE2Sp';
 
-let mode = 'login'; // 'login' | 'register'
+let mode = 'login';
+const $ = id => document.getElementById(id);
 
 // ── Device info ──
 function getDeviceInfo() {
   const ua = navigator.userAgent;
-  let os = 'Unknown', model = '';
-  if (/iPhone/.test(ua)) { os = 'iOS'; const m = ua.match(/iPhone(\d+,\d+| [A-Za-z]+)/); model = m ? 'iPhone' + m[0].replace('iPhone ','') : 'iPhone'; }
-  else if (/iPad/.test(ua)) { os = 'iPadOS'; model = 'iPad'; }
-  else if (/Android/.test(ua)) { os = 'Android'; const m = ua.match(/Android [\d.]+; ([^;)]+)/); model = m ? m[1].trim() : 'Android'; }
-  else if (/Windows/.test(ua)) { os = 'Windows'; model = 'PC'; }
-  else if (/Mac/.test(ua)) { os = 'macOS'; model = 'Mac'; }
-  return os + ' | ' + model + ' | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Other');
+  if (/iPhone/.test(ua)) return 'iOS | iPhone | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Safari');
+  if (/iPad/.test(ua)) return 'iPadOS | iPad | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Safari');
+  if (/Android/.test(ua)) {
+    const m = ua.match(/; ([^;)]+)(?=;|\))/);
+    return 'Android | ' + (m ? m[1].trim() : 'Phone') + ' | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Browser');
+  }
+  if (/Windows/.test(ua)) return 'Windows | PC | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Browser');
+  if (/Mac/.test(ua)) return 'macOS | Mac | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Safari');
+  return 'Unknown | Unknown | Unknown';
 }
 
 // ── Hash password ──
 async function hashPassword(pwd) {
   const data = new TextEncoder().encode(pwd);
   const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function showError(msg) {
+  $('errorMsg').textContent = msg;
+  $('errorMsg').style.display = '';
+}
+
+function setLoading(loading) {
+  const btn = $('btnSubmit');
+  btn.disabled = loading;
+  btn.textContent = loading ? '请稍候...' : (mode === 'login' ? '登 录' : '注 册');
 }
 
 // ── Toggle mode ──
-document.getElementById('btnToggle').addEventListener('click', () => {
+$('btnToggle').addEventListener('click', () => {
   mode = mode === 'login' ? 'register' : 'login';
-  document.getElementById('modeTitle').textContent = mode === 'login' ? '登录' : '注册';
-  document.getElementById('modeSub').textContent = mode === 'login' ? '使用手机号登录学习计时' : '创建账号开始记录学习';
-  document.getElementById('btnSubmit').textContent = mode === 'login' ? '登 录' : '注 册';
-  document.getElementById('btnToggle').textContent = mode === 'login' ? '还没有账号？点此注册' : '已有账号？点此登录';
-  document.getElementById('extraFields').style.display = mode === 'register' ? '' : 'none';
-  document.getElementById('errorMsg').style.display = 'none';
+  $('modeTitle').textContent = mode === 'login' ? '登录' : '注册';
+  $('modeSub').textContent = mode === 'login' ? '使用手机号登录学习计时' : '创建账号开始记录学习';
+  $('btnSubmit').textContent = mode === 'login' ? '登 录' : '注 册';
+  $('btnToggle').textContent = mode === 'login' ? '还没有账号？点此注册' : '已有账号？点此登录';
+  $('extraFields').style.display = mode === 'register' ? '' : 'none';
+  $('errorMsg').style.display = 'none';
 });
 
 // ── Submit ──
-document.getElementById('btnSubmit').addEventListener('click', async () => {
-  const phone = document.getElementById('phone').value.trim();
-  const password = document.getElementById('password').value;
-  const name = document.getElementById('name').value.trim();
-  const errorEl = document.getElementById('errorMsg');
+$('btnSubmit').addEventListener('click', async () => {
+  const phone = $('phone').value.trim();
+  const password = $('password').value;
+  const name = $('name').value.trim();
 
-  errorEl.style.display = 'none';
+  $('errorMsg').style.display = 'none';
 
-  if (!phone || phone.length < 11) { errorEl.textContent = '请输入正确的手机号'; errorEl.style.display = ''; return; }
-  if (!password || password.length < 4) { errorEl.textContent = '密码至少 4 位'; errorEl.style.display = ''; return; }
-  if (mode === 'register' && !name) { errorEl.textContent = '请输入你的名字'; errorEl.style.display = ''; return; }
+  if (!phone || phone.length < 11) { showError('请输入正确的手机号（11位）'); return; }
+  if (!password || password.length < 4) { showError('密码至少4位'); return; }
+  if (mode === 'register' && !name) { showError('请输入你的名字'); return; }
 
-  if (mode === 'register') {
-    // Check if phone exists
-    const check = await fetch(SUPABASE_URL + '/rest/v1/users?phone=eq.' + encodeURIComponent(phone) + '&select=id&limit=1', {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-    });
-    const existing = await check.json();
-    if (existing.length > 0) { errorEl.textContent = '该手机号已注册，请直接登录'; errorEl.style.display = ''; return; }
+  setLoading(true);
 
-    // Register
-    const pHash = await hashPassword(password);
-    const deviceInfo = getDeviceInfo();
-    const res = await fetch(SUPABASE_URL + '/rest/v1/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json; charset=utf-8', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': 'return=representation' },
-      body: JSON.stringify({ phone, name, password_hash: pHash, device_info: deviceInfo })
-    });
-    if (res.ok) {
-      const users = await res.json();
+  try {
+    if (mode === 'register') {
+      // Check if phone taken
+      const checkRes = await fetch(
+        SUPABASE_URL + '/rest/v1/users?phone=eq.' + encodeURIComponent(phone) + '&select=id&limit=1',
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+      );
+      if (!checkRes.ok) throw new Error('网络错误，请检查连接');
+      const existing = await checkRes.json();
+      if (existing.length > 0) { showError('该手机号已注册，请直接登录'); setLoading(false); return; }
+
+      // Register
+      const pHash = await hashPassword(password);
+      const deviceInfo = getDeviceInfo();
+      const regRes = await fetch(SUPABASE_URL + '/rest/v1/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({ phone, name, password_hash: pHash, device_info: deviceInfo })
+      });
+
+      if (!regRes.ok) throw new Error('注册失败，请重试（HTTP ' + regRes.status + '）');
+
+      const users = await regRes.json();
       sessionStorage.setItem('user', JSON.stringify(users[0]));
       location.href = 'index.html';
     } else {
-      errorEl.textContent = '注册失败，请重试'; errorEl.style.display = '';
+      // Login
+      const loginRes = await fetch(
+        SUPABASE_URL + '/rest/v1/users?phone=eq.' + encodeURIComponent(phone) + '&select=*&limit=1',
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+      );
+      if (!loginRes.ok) throw new Error('网络错误，请检查连接');
+      const users = await loginRes.json();
+
+      if (users.length === 0) { showError('账号不存在，请先注册'); setLoading(false); return; }
+
+      const pHash = await hashPassword(password);
+      if (pHash !== users[0].password_hash) { showError('密码错误'); setLoading(false); return; }
+
+      sessionStorage.setItem('user', JSON.stringify(users[0]));
+      location.href = 'index.html';
     }
-  } else {
-    // Login
-    const res = await fetch(SUPABASE_URL + '/rest/v1/users?phone=eq.' + encodeURIComponent(phone) + '&select=*&limit=1', {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-    });
-    const users = await res.json();
-    if (users.length === 0) { errorEl.textContent = '账号不存在，请先注册'; errorEl.style.display = ''; return; }
-
-    const pHash = await hashPassword(password);
-    if (pHash !== users[0].password_hash) { errorEl.textContent = '密码错误'; errorEl.style.display = ''; return; }
-
-    sessionStorage.setItem('user', JSON.stringify(users[0]));
-    location.href = 'index.html';
+  } catch (err) {
+    console.error(err);
+    showError('操作失败：' + (err.message || '未知错误，请重试'));
+    setLoading(false);
   }
 });
 
 // ── Enter key ──
-document.querySelectorAll('input').forEach(el => {
-  el.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btnSubmit').click(); });
+$('password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') $('btnSubmit').click();
+});
+$('phone').addEventListener('keydown', e => {
+  if (e.key === 'Enter') $('password').focus();
+});
+$('name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') $('password').focus();
 });
 </script>
 </body>
