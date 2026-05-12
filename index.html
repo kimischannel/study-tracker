@@ -276,10 +276,10 @@ body {
         <div class="timer-display" id="timerDisplay">00:00:00</div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-green" id="btnStart">▶ 开卷</button>
-        <button class="btn btn-amber" id="btnPause" style="display:none">⏸ 暂停</button>
-        <button class="btn btn-red" id="btnStop" disabled>⏹ 结束</button>
-        <button class="btn btn-ghost" id="btnReset">↻</button>
+        <button class="btn btn-green" id="btnStart">Study</button>
+        <button class="btn btn-amber" id="btnPause" style="display:none">Pause</button>
+        <button class="btn btn-red" id="btnStop" disabled>End</button>
+        <button class="btn btn-ghost" id="btnReset">Reset</button>
       </div>
     </div>
 
@@ -438,15 +438,44 @@ if (!currentUser) {
 if (!currentUser) { location.href = 'login.html'; }
 
 // ── Data ──
-const STORAGE_KEY = 'kimis-channel-data';
+const STORAGE_KEY = 'kc-data-' + currentUser.id;
 const RING_CIRCUMFERENCE = 2 * Math.PI * 96;
+
+// Migrate old data
+(function() {
+  const oldKeys = ['kimis-channel-data', 'study-tracker-data'];
+  oldKeys.forEach(function(ok) {
+    if (ok === STORAGE_KEY) return;
+    var old = localStorage.getItem(ok);
+    if (old) {
+      try {
+        var oldData = JSON.parse(old);
+        var cur = load();
+        if (oldData.sessions && oldData.sessions.length > (cur.sessions||[]).length) {
+          cur.sessions = oldData.sessions;
+        }
+        if (oldData.sleepLog && oldData.sleepLog.length > (cur.sleepLog||[]).length) {
+          cur.sleepLog = oldData.sleepLog;
+        }
+        if (oldData.diary && oldData.diary.length > (cur.diary||[]).length) {
+          cur.diary = oldData.diary;
+        }
+        if (oldData.leisureLog && oldData.leisureLog.length > (cur.leisureLog||[]).length) {
+          cur.leisureLog = oldData.leisureLog;
+        }
+        save(cur);
+        localStorage.removeItem(ok);
+      } catch(e) {}
+    }
+  });
+})();
 
 function load() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) return JSON.parse(raw);
   return { sessions: [], diary: [], sleepLog: [], leisureLog: [] };
 }
-function save(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+function save(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); syncUserData(data); }
 
 // ── Helpers ──
 const AVATAR_COLORS = ['#059669','#3b82f6','#8b5cf6','#e11d48','#ea580c','#0891b2','#7c3aed','#be185d'];
@@ -837,19 +866,103 @@ document.addEventListener('keydown', e => {
     } catch(e) { console.error('[sync] delete error:', e); }
   };
 
-  fetch(SUPABASE_URL + '/rest/v1/sessions?user_id=eq.' + currentUser.id + '&select=*&order=start_time.desc&limit=500', {
+  function genId() { return crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 10); }
+  function headers() { return { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': 'return=minimal' }; }
+
+  // Sync non-session user data (sleep/diary/leisure) to Supabase
+  window.syncUserData = async function(data) {
+    try {
+      // Delete old sync entries for this user
+      var delPending = [];
+      ['__SLEEP__', '__LEISURE__', '__DIARY__'].forEach(function(prefix) {
+        var url = SUPABASE_URL + '/rest/v1/sessions?user_id=eq.' + currentUser.id + '&subject=like.' + prefix + '*&select=id';
+        delPending.push(fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } })
+          .then(function(r) { return r.json(); })
+          .then(function(rows) {
+            if (!Array.isArray(rows)) return;
+            return Promise.all(rows.map(function(r) {
+              return fetch(SUPABASE_URL + '/rest/v1/sessions?id=eq.' + r.id, {
+                method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+              });
+            }));
+          }).catch(function(){}));
+      });
+      await Promise.all(delPending);
+
+      // Build sync entries
+      var entries = [];
+      data.sleepLog.forEach(function(s) {
+        entries.push({
+          id: genId(), user_id: currentUser.id, subject: '__SLEEP__|' + s.date + '|' + s.hours + '|' + (s.start||'') + '|' + (s.end||''),
+          start_time: s.date + 'T00:00:00Z', end_time: s.date + 'T00:00:00Z', duration: Math.round(s.hours * 3600)
+        });
+      });
+      data.leisureLog.forEach(function(l) {
+        entries.push({
+          id: genId(), user_id: currentUser.id, subject: '__LEISURE__|' + l.date + '|' + l.hours,
+          start_time: l.date + 'T00:00:00Z', end_time: l.date + 'T00:00:00Z', duration: Math.round(l.hours * 3600)
+        });
+      });
+      data.diary.forEach(function(d) {
+        var cleanText = (d.text || '').replace(/\|/g, ' ').slice(0, 400);
+        entries.push({
+          id: genId(), user_id: currentUser.id, subject: '__DIARY__|' + d.date + '|' + d.id + '|' + cleanText,
+          start_time: d.date + 'T00:00:00Z', end_time: d.date + 'T00:00:00Z', duration: 0
+        });
+      });
+
+      // Insert sync entries in batches
+      for (var i = 0; i < entries.length; i++) {
+        await fetch(SUPABASE_URL + '/rest/v1/sessions', {
+          method: 'POST', headers: headers(), body: JSON.stringify(entries[i])
+        }).catch(function(){});
+      }
+    } catch(e) { console.error('[sync] userdata error:', e); }
+  };
+
+  // Fetch all remote sessions (includes sync entries)
+  fetch(SUPABASE_URL + '/rest/v1/sessions?user_id=eq.' + currentUser.id + '&select=*&order=start_time.desc&limit=800', {
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-  }).then(res => res.json()).then(remote => {
-    if (!remote.length) return;
-    const data = load();
-    const localIds = {};
-    data.sessions.forEach(s => { localIds[s.id] = true; });
-    let added = 0;
-    remote.forEach(r => {
-      if (!localIds[r.id]) { data.sessions.push({ id: r.id, subject: r.subject, startTime: r.start_time, endTime: r.end_time, duration: r.duration, user_id: r.user_id, user_name: currentUser.name }); added++; }
+  }).then(function(res) { return res.json(); }).then(function(remote) {
+    if (!remote || !remote.length) return;
+    var data = load();
+    var localIds = {};
+    data.sessions.forEach(function(s) { localIds[s.id] = true; });
+
+    remote.forEach(function(r) {
+      var subj = r.subject || '';
+      // Parse sync entries
+      if (subj.startsWith('__SLEEP__')) {
+        var parts = subj.split('|');
+        if (parts.length >= 3) {
+          var existingIdx = data.sleepLog.findIndex(function(x) { return x.date === parts[1]; });
+          var entry = { date: parts[1], hours: parseFloat(parts[2])||0, start: parts[3]||'', end: parts[4]||'' };
+          if (existingIdx >= 0) { data.sleepLog[existingIdx] = entry; } else { data.sleepLog.push(entry); }
+        }
+      } else if (subj.startsWith('__LEISURE__')) {
+        var p = subj.split('|');
+        if (p.length >= 3) {
+          var idx = data.leisureLog.findIndex(function(x) { return x.date === p[1]; });
+          var e = { date: p[1], hours: parseFloat(p[2])||0 };
+          if (idx >= 0) { data.leisureLog[idx] = e; } else { data.leisureLog.push(e); }
+        }
+      } else if (subj.startsWith('__DIARY__')) {
+        var dp = subj.split('|');
+        if (dp.length >= 4) {
+          var dix = data.diary.findIndex(function(x) { return x.id === dp[2]; });
+          var de = { id: dp[2], date: dp[1], text: dp.slice(3).join('|') };
+          if (dix >= 0) {
+            // Only overwrite if local text is empty (remote might be newer)
+            if (!data.diary[dix].text) data.diary[dix] = de;
+          } else { data.diary.push(de); }
+        }
+      } else if (!localIds[r.id]) {
+        // Regular session
+        data.sessions.push({ id: r.id, subject: r.subject, startTime: r.start_time, endTime: r.end_time, duration: r.duration, user_id: r.user_id, user_name: currentUser.name });
+      }
     });
-    if (added > 0) { save(data); refreshAll(); }
-  });
+    save(data); refreshAll();
+  }).catch(function(e) { console.error('[sync] fetch error:', e); });
 })();
 
 // ── 9 PM Auto Summary ──
