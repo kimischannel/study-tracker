@@ -681,6 +681,41 @@ window.addEventListener('resize', () => {
   const statsPanel = document.getElementById('statsPanel');
   if (statsPanel.style.display !== 'none') drawChart(load());
 });
+
+// ── Analytics ──
+(function() {
+  const SUPABASE_URL = 'https://fdldkejfkvcymlzcmeub.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_0r9JoiUqOggGX7Cum1gjtQ_WEkBE2Sp';
+
+  // Generate or retrieve visitor ID
+  let visitorId = localStorage.getItem('svid');
+  if (!visitorId) {
+    visitorId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('svid', visitorId);
+  }
+
+  const ua = navigator.userAgent;
+  const isMobile = /Mobi|Android|iPhone/i.test(ua);
+  const isTablet = /iPad|Tablet/i.test(ua) || (isMobile && window.innerWidth > 768);
+  const device = isTablet ? '平板' : isMobile ? '手机' : '电脑';
+
+  fetch(SUPABASE_URL + '/rest/v1/visits', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({
+      page: window.location.pathname,
+      referrer: document.referrer || '直接访问',
+      user_agent: device + ' | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || '其他浏览器'),
+      screen_size: window.innerWidth + 'x' + window.innerHeight,
+      visitor_id: visitorId
+    })
+  }).catch(function() { /* 静默失败，不影响主功能 */ });
+})();
 </script>
 </body>
 </html>
