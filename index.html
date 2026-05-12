@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Kimis Channel</title>
+<title>Kimi's Channel</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -157,6 +157,21 @@ body {
   font-size: 1.1rem; float: right; padding: 2px 6px; border-radius: 6px;
 }
 .diary-item-del:hover { color: var(--red); background: #fef2f2; }
+.diary-photo-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.diary-photo { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-light); }
+.diary-photo-wrap { position: relative; display: inline-block; }
+.diary-photo-del {
+  position: absolute; top: -6px; right: -6px; width: 20px; height: 20px;
+  background: var(--red); color: #fff; border: none; border-radius: 50%;
+  font-size: 12px; cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center;
+}
+.btn-camera {
+  display: inline-flex; align-items: center; gap: 4px; padding: 7px 14px;
+  border-radius: 16px; font-size: 0.8rem; font-weight: 600; border: 1.5px dashed var(--border);
+  background: #fafbfc; color: var(--muted); cursor: pointer; transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+.btn-camera:hover { border-color: var(--green); color: var(--green); }
 
 /* Sleep */
 .sleep-card { text-align: center; }
@@ -215,7 +230,7 @@ body {
     <div class="header-left">
       <div class="avatar" id="userAvatar"></div>
       <div>
-        <div class="header-title">Kimis Channel</div>
+        <div class="header-title">Kimi's Channel</div>
         <div class="header-date" id="headerDate"></div>
       </div>
     </div>
@@ -262,7 +277,7 @@ body {
   <!-- ===== 888 Panel ===== -->
   <div class="panel" id="panel888">
     <div class="card">
-      <div class="triple-header">📊 今日 888 计划</div>
+      <div class="triple-header">📊 今日 8 小时学习计划</div>
       <div class="triple-progress">
         <div class="progress-row">
           <span class="progress-label">😴</span>
@@ -336,7 +351,10 @@ body {
     <div class="card">
       <div class="diary-date" id="diaryDate"></div>
       <textarea class="diary-textarea" id="diaryText" placeholder="写点什么……"></textarea>
-      <div style="margin-top:10px;text-align:right">
+      <div class="diary-photo-row" id="diaryPhotos"></div>
+      <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+        <button class="btn-camera" id="btnCamera">📷 拍照</button>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
         <button class="btn-sm" id="btnSaveDiary">保存日记</button>
       </div>
     </div>
@@ -357,7 +375,7 @@ body {
         <div class="profile-stat"><span>累计学习</span><span style="font-weight:700" id="statTotalStudy">-</span></div>
         <div class="profile-stat"><span>累计学习次数</span><span style="font-weight:700" id="statTotalSessions">-</span></div>
         <div class="profile-stat"><span>日记篇数</span><span style="font-weight:700" id="statTotalDiary">-</span></div>
-        <div class="profile-stat"><span>888 达标天数</span><span style="font-weight:700" id="stat888Days">-</span></div>
+        <div class="profile-stat"><span>8小时达标天数</span><span style="font-weight:700" id="stat888Days">-</span></div>
       </div>
       <button class="btn btn-ghost" id="btnLogout" style="width:100%;margin-top:8px">退出登录</button>
     </div>
@@ -372,7 +390,7 @@ body {
     <span class="nav-icon">⏱️</span>计时
   </div>
   <div class="nav-item" data-tab="888">
-    <span class="nav-icon">📊</span>888
+    <span class="nav-icon">📊</span>8小时
   </div>
   <div class="nav-item" data-tab="diary">
     <span class="nav-icon">📝</span>日记
@@ -571,7 +589,7 @@ function refresh888() {
 
   const all8 = sleepH >= 8 && studyH >= 8 && leisureH >= 8;
   const any = sleepH > 0 || studyH > 0 || leisureH > 0;
-  document.getElementById('summaryMsg').textContent = all8 ? '✨ 今日 888 全部达标！' : any ? '继续加油，你可以的 💪' : '今天也要加油哦 💪';
+  document.getElementById('summaryMsg').textContent = all8 ? '✨ 今日 8 小时学习计划全部达标！' : any ? '继续加油，你可以的 💪' : '今天也要加油哦 💪';
   document.getElementById('daySummary').textContent = any ? `😴${sleepH.toFixed(0)}h 📖${studyH.toFixed(0)}h 🎮${leisureH.toFixed(0)}h` : '';
 
   // Sleep calc
@@ -624,11 +642,65 @@ document.getElementById('btnSaveLeisure').addEventListener('click', () => {
 });
 
 // ── Diary ──
+let pendingPhotos = [];
+
+function compressImage(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 600;
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPhotoPreviews() {
+  const container = document.getElementById('diaryPhotos');
+  container.innerHTML = pendingPhotos.map((p, i) => `
+    <div class="diary-photo-wrap">
+      <img class="diary-photo" src="${p}" alt="photo">
+      <button class="diary-photo-del" data-idx="${i}">×</button>
+    </div>
+  `).join('');
+  container.querySelectorAll('.diary-photo-del').forEach(b => b.addEventListener('click', () => {
+    pendingPhotos.splice(parseInt(b.dataset.idx), 1);
+    renderPhotoPreviews();
+  }));
+}
+
+document.getElementById('btnCamera').addEventListener('click', () => {
+  document.getElementById('photoInput').click();
+});
+
+document.getElementById('photoInput').addEventListener('change', async (e) => {
+  const files = e.target.files;
+  if (!files.length) return;
+  for (const file of files) {
+    const b64 = await compressImage(file);
+    pendingPhotos.push(b64);
+  }
+  renderPhotoPreviews();
+  e.target.value = '';
+});
+
 function refreshDiary() {
   document.getElementById('diaryDate').textContent = new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
   const data = load(), today = todayStr();
   const todayEntry = data.diary.find(d => d.date === today);
   document.getElementById('diaryText').value = todayEntry ? todayEntry.text : '';
+  pendingPhotos = todayEntry && todayEntry.photos ? [...todayEntry.photos] : [];
+  renderPhotoPreviews();
 
   const list = document.getElementById('diaryList');
   const sorted = [...data.diary].sort((a, b) => b.date.localeCompare(a.date));
@@ -640,6 +712,7 @@ function refreshDiary() {
         <button class="diary-item-del" data-del="${d.id}">×</button>
         <div class="diary-item-date">${d.date}</div>
         <div class="diary-item-text">${esc(d.text)}</div>
+        ${d.photos && d.photos.length ? '<div class="diary-photo-row">' + d.photos.map(p => `<img class="diary-photo" src="${p}" alt="photo" style="cursor:pointer" onclick="this.style.position='fixed';this.style.top='50%';this.style.left='50%';this.style.transform='translate(-50%,-50%)';this.style.width='auto';this.style.height='auto';this.style.maxWidth='90vw';this.style.maxHeight='90vh';this.style.zIndex='9999';this.style.objectFit='contain';this.onclick=function(){this.style.display='none'}">`).join('') + '</div>' : ''}
       </div>
     `).join('');
     list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
@@ -651,18 +724,16 @@ function refreshDiary() {
 
 document.getElementById('btnSaveDiary').addEventListener('click', () => {
   const text = document.getElementById('diaryText').value.trim();
-  if (!text) return toast('请输入日记内容');
+  if (!text && !pendingPhotos.length) return toast('请输入日记内容或拍照');
   const data = load(), today = todayStr();
   const idx = data.diary.findIndex(d => d.date === today);
-  if (idx >= 0) {
-    data.diary[idx].text = text;
-  } else {
-    data.diary.push({
-      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36),
-      date: today,
-      text: text
-    });
-  }
+  const entry = {
+    id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36),
+    date: today,
+    text: text,
+    photos: pendingPhotos
+  };
+  if (idx >= 0) { data.diary[idx] = entry; } else { data.diary.push(entry); }
   save(data); refreshDiary(); refreshAll();
   toast('✅ 日记已保存');
 });
@@ -758,7 +829,7 @@ document.addEventListener('keydown', e => {
       const sleepH = (data.sleepLog.find(s => s.date === today) || {}).hours || 0;
       const leisureH = (data.leisureLog.find(l => l.date === today) || {}).hours || 0;
       const all8 = sleepH >= 8 && studyH >= 8 && leisureH >= 8;
-      toast('🕘 9点结算：' + (all8 ? '🎉 888 全部达标！' : '还有进步空间，明天继续加油！'));
+      toast('🕘 9点结算：' + (all8 ? '🎉 8小时全部达标！' : '还有进步空间，明天继续加油！'));
     }
   }
   setInterval(check9pm, 60000);
