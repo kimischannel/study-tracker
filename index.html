@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学习时间记录 — Kai 助手</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f0f2f5;
+  --card: #ffffff;
+  --text: #1e1e2e;
+  --muted: #9098a5;
+  --accent: #5b6af0;
+  --accent-light: #eef0ff;
+  --accent-glow: rgba(91,106,240,0.15);
+  --danger: #e5484d;
+  --border: #eaecf0;
+  --success: #30a46c;
+  --warn: #f59e0b;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 50% 0%, #e8ecfb 0%, transparent 60%);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 32px 16px 64px;
+  -webkit-font-smoothing: antialiased;
+}
+.app { width: 100%; max-width: 540px; display: flex; flex-direction: column; gap: 16px; }
+
+/* Header */
+.header { text-align: center; padding: 8px 0 4px; }
+.header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+.header span { font-size: 13px; color: var(--muted); }
+
+/* Card */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: box-shadow 0.2s;
+}
+
+/* Timer */
+.timer-section { text-align: center; padding: 28px 24px 24px; }
+.timer-wrapper { position: relative; display: inline-block; margin: 8px 0 20px; }
+.timer-ring { transform: rotate(-90deg); }
+.timer-ring-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+.timer-ring-fg { fill: none; stroke: var(--accent); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.4s; }
+.timer-ring-fg.active { stroke: var(--accent); }
+.timer-display {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 48px; font-weight: 700; font-variant-numeric: tabular-nums;
+  letter-spacing: 1px; color: var(--text);
+}
+.timer-display.active { color: var(--accent); }
+.subject-input {
+  width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 16px; font-size: 15px; margin-bottom: 18px; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s; background: #fafbfc;
+}
+.subject-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); background: #fff; }
+.subject-input::placeholder { color: #c0c6d0; }
+.btn-row { display: flex; gap: 10px; justify-content: center; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 11px 22px;
+  border-radius: 24px; font-size: 15px; font-weight: 600; border: none;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.btn:active { transform: scale(0.96); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.btn-start { background: var(--accent); color: #fff; box-shadow: 0 2px 8px var(--accent-glow); }
+.btn-start:hover:not(:disabled) { background: #4a5ad9; box-shadow: 0 4px 14px rgba(91,106,240,0.3); }
+.btn-pause { background: var(--warn); color: #fff; }
+.btn-pause:hover { background: #d98c00; }
+.btn-stop { background: #fff; color: var(--danger); border: 1.5px solid var(--danger); }
+.btn-stop:hover:not(:disabled) { background: #fff5f5; }
+.btn-reset { background: #f3f4f6; color: var(--muted); }
+.btn-reset:hover { background: #e5e7eb; }
+
+/* Progress */
+.progress-section { }
+.progress-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.progress-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+.progress-text { font-size: 13px; color: var(--muted); font-weight: 500; }
+.progress-bar-outer { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.progress-bar-inner {
+  height: 100%; border-radius: 4px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s;
+  background: linear-gradient(90deg, var(--accent), #8b5cf6);
+}
+.progress-bar-inner.done { background: linear-gradient(90deg, var(--success), #34d399); }
+
+/* Goal */
+.goal-section { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.goal-label { font-size: 14px; font-weight: 600; }
+.goal-input-group { display: flex; align-items: center; gap: 4px; font-size: 14px; color: var(--muted); }
+.goal-input {
+  width: 52px; border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 8px 6px; font-size: 14px; text-align: center; outline: none;
+  font-weight: 600; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.goal-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.btn-goal-save {
+  font-size: 13px; font-weight: 600; padding: 8px 18px; background: var(--accent);
+  color: #fff; border: none; border-radius: 20px; cursor: pointer; transition: all 0.2s;
+}
+.btn-goal-save:hover { background: #4a5ad9; }
+.btn-goal-save:active { transform: scale(0.96); }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; background: #f3f4f6; border-radius: 12px; padding: 4px; margin-bottom: 20px; }
+.tab {
+  flex: 1; text-align: center; padding: 9px; font-size: 14px; font-weight: 600;
+  color: var(--muted); cursor: pointer; border-radius: 9px; transition: all 0.2s;
+}
+.tab.active { background: #fff; color: var(--text); box-shadow: var(--shadow-sm); }
+
+/* History */
+.history-day { margin-bottom: 18px; }
+.history-date {
+  font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.history-date::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.history-date-today { color: var(--accent); }
+.session-item {
+  display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+  border-radius: var(--radius-sm); margin-bottom: 4px; transition: background 0.15s;
+}
+.session-item:hover { background: #f9fafb; }
+.subject-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.session-info { flex: 1; min-width: 0; }
+.session-subject { font-size: 15px; font-weight: 600; }
+.session-time { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.session-duration { font-size: 15px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.session-delete {
+  background: none; border: none; color: #c0c6d0; cursor: pointer; font-size: 20px;
+  padding: 6px 8px; border-radius: 8px; transition: all 0.15s; line-height: 1;
+}
+.session-delete:hover { color: var(--danger); background: #fff5f5; }
+.no-data { text-align: center; color: var(--muted); padding: 40px 0; }
+.no-data-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.6; }
+.no-data-text { font-size: 14px; }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+.stat-box {
+  text-align: center; background: var(--accent-light); border-radius: var(--radius-sm);
+  padding: 18px 6px; transition: transform 0.2s;
+}
+.stat-box:hover { transform: translateY(-2px); }
+.stat-icon { font-size: 20px; margin-bottom: 6px; }
+.stat-value { font-size: 20px; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+.chart-title { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.6px; }
+.chart-container { width: 100%; }
+.chart-container canvas { width: 100%; border-radius: 8px; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: #1e1e2e; color: #fff; padding: 12px 24px; border-radius: 24px;
+  font-size: 14px; font-weight: 600; opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none; z-index: 100;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>学习计时</h1>
+    <span>Kai 助手</span>
+  </div>
+
+  <!-- Timer -->
+  <div class="card timer-section">
+    <input class="subject-input" id="subject" placeholder="输入科目名称，如：数学、编程、英语…" autocomplete="off">
+    <div class="timer-wrapper">
+      <svg class="timer-ring" width="200" height="200" viewBox="0 0 200 200">
+        <circle class="timer-ring-bg" cx="100" cy="100" r="92"/>
+        <circle class="timer-ring-fg" id="timerRing" cx="100" cy="100" r="92"
+          stroke-dasharray="578" stroke-dashoffset="578"/>
+      </svg>
+      <div class="timer-display" id="timerDisplay">00:00:00</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-start" id="btnStart">▶ 开始</button>
+      <button class="btn btn-pause" id="btnPause" style="display:none">⏸ 暂停</button>
+      <button class="btn btn-stop" id="btnStop" disabled>⏹ 停止</button>
+      <button class="btn btn-reset" id="btnReset">↺ 重置</button>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="card progress-section">
+    <div class="progress-header">
+      <span class="progress-title">今日进度</span>
+      <span class="progress-text" id="progressText">0h 0m / 2h 0m</span>
+    </div>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Goal -->
+  <div class="card goal-section">
+    <span class="goal-label">🎯 每日目标</span>
+    <div class="goal-input-group">
+      <input class="goal-input" id="goalHours" type="number" min="0" max="24" value="2"> 小时
+      <input class="goal-input" id="goalMinutes" type="number" min="0" max="59" value="0"> 分钟
+    </div>
+    <button class="btn-goal-save" id="btnSaveGoal">保存</button>
+  </div>
+
+  <!-- Tabs + Content -->
+  <div class="card">
+    <div class="tabs">
+      <div class="tab active" data-tab="history">📋 历史记录</div>
+      <div class="tab" data-tab="stats">📊 统计图表</div>
+    </div>
+    <div id="historyPanel"></div>
+    <div id="statsPanel" style="display:none">
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-icon">☀️</div>
+          <div class="stat-value" id="statToday">0h 0m</div>
+          <div class="stat-label">今日</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon">📅</div>
+          <div class="stat-value" id="statWeek">0h 0m</div>
+          <div class="stat-label">本周</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon">📆</div>
+          <div class="stat-value" id="statMonth">0h 0m</div>
+          <div class="stat-label">本月</div>
+        </div>
+      </div>
+      <div class="chart-title">近 7 天学习时长</div>
+      <div class="chart-container"><canvas id="chartCanvas"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Data layer ──
+const STORAGE_KEY = 'study-tracker-data';
+const RING_CIRCUMFERENCE = 2 * Math.PI * 92; // ~578
+
+function load() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) return JSON.parse(raw);
+  return { sessions: [], dailyGoal: 7200 };
+}
+
+function save(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ── Toast ──
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+// ── Timer state ──
+let timerInterval = null;
+let pausedMs = 0;
+let phaseStart = null;
+let animFrame = null;
+let lastMs = 0;
+
+function getRunningMs() {
+  if (!phaseStart) return pausedMs;
+  return pausedMs + (Date.now() - phaseStart);
+}
+
+function formatDuration(totalMs) {
+  const s = Math.floor(totalMs / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+function formatDurationShort(totalMs) {
+  const s = Math.floor(totalMs / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function updateDisplay() {
+  const ms = getRunningMs();
+  document.getElementById('timerDisplay').textContent = formatDuration(ms);
+  updateRing(ms);
+}
+
+function updateRing(ms) {
+  const ring = document.getElementById('timerRing');
+  const goal = load().dailyGoal * 1000;
+  const pct = goal > 0 ? Math.min(ms / goal, 1) : 0;
+  const offset = RING_CIRCUMFERENCE * (1 - pct);
+  ring.style.strokeDashoffset = offset;
+}
+
+function setRunning(isRunning) {
+  const display = document.getElementById('timerDisplay');
+  const ring = document.getElementById('timerRing');
+  const btnStart = document.getElementById('btnStart');
+  const btnPause = document.getElementById('btnPause');
+  const btnStop = document.getElementById('btnStop');
+  const btnReset = document.getElementById('btnReset');
+  if (isRunning) {
+    display.classList.add('active');
+    ring.classList.add('active');
+    btnStart.style.display = 'none';
+    btnPause.style.display = '';
+    btnStop.disabled = false;
+    btnReset.disabled = true;
+  } else {
+    display.classList.remove('active');
+    ring.classList.remove('active');
+    btnStart.style.display = '';
+    btnPause.style.display = 'none';
+    btnStop.disabled = true;
+    btnReset.disabled = false;
+  }
+}
+
+function startTimer() {
+  phaseStart = Date.now();
+  timerInterval = setInterval(updateDisplay, 200);
+  setRunning(true);
+}
+
+function pauseTimer() {
+  if (phaseStart) {
+    pausedMs += Date.now() - phaseStart;
+    phaseStart = null;
+  }
+  clearInterval(timerInterval);
+  timerInterval = null;
+  updateDisplay();
+  setRunning(false);
+}
+
+function stopTimer() {
+  if (!phaseStart && pausedMs === 0) return;
+  const totalMs = getRunningMs();
+  clearInterval(timerInterval);
+  timerInterval = null;
+
+  const data = load();
+  const now = new Date();
+  const session = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    subject: document.getElementById('subject').value.trim() || '未命名',
+    startTime: new Date(now - totalMs).toISOString(),
+    endTime: now.toISOString(),
+    duration: Math.round(totalMs / 1000)
+  };
+  data.sessions.push(session);
+  save(data);
+
+  pausedMs = 0;
+  phaseStart = null;
+  updateDisplay();
+  setRunning(false);
+  refreshAll();
+  showToast('✅ 学习记录已保存');
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  pausedMs = 0;
+  phaseStart = null;
+  updateDisplay();
+  setRunning(false);
+}
+
+// ── Subject colors ──
+const SUBJECT_COLORS = ['#5b6af0','#30a46c','#f59e0b','#e5484d','#8b5cf6','#06b6d4','#f97316','#ec4899'];
+const subjectColorCache = {};
+
+function getSubjectColor(subject) {
+  if (!subjectColorCache[subject]) {
+    let hash = 0;
+    for (let i = 0; i < subject.length; i++) hash = ((hash << 5) - hash) + subject.charCodeAt(i);
+    subjectColorCache[subject] = SUBJECT_COLORS[Math.abs(hash) % SUBJECT_COLORS.length];
+  }
+  return subjectColorCache[subject];
+}
+
+// ── Progress ──
+function updateProgress() {
+  const data = load();
+  const goal = data.dailyGoal;
+  const today = new Date().toISOString().slice(0, 10);
+  const todaySessions = data.sessions.filter(s => s.startTime.slice(0, 10) === today);
+  const totalSec = todaySessions.reduce((sum, s) => sum + s.duration, 0);
+
+  document.getElementById('progressText').textContent =
+    `${formatDurationShort(totalSec * 1000)} / ${formatDurationShort(goal * 1000)}`;
+
+  const pct = goal > 0 ? Math.min(100, Math.round((totalSec / goal) * 100)) : 0;
+  const bar = document.getElementById('progressBar');
+  bar.style.width = pct + '%';
+  bar.classList.toggle('done', pct >= 100);
+
+  // Update ring too
+  if (!phaseStart && !timerInterval) {
+    updateRing(totalSec * 1000);
+  }
+}
+
+// ── History ──
+function renderHistory() {
+  const data = load();
+  const panel = document.getElementById('historyPanel');
+  if (data.sessions.length === 0) {
+    panel.innerHTML = `
+      <div class="no-data">
+        <div class="no-data-icon">📝</div>
+        <div class="no-data-text">还没有学习记录</div>
+        <div class="no-data-text" style="font-size:12px;margin-top:4px">点击上方「开始」计时吧</div>
+      </div>`;
+    return;
+  }
+
+  const sorted = [...data.sessions].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+  const groups = {};
+  sorted.forEach(s => {
+    const date = s.startTime.slice(0, 10);
+    if (!groups[date]) groups[date] = [];
+    groups[date].push(s);
+  });
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  panel.innerHTML = Object.entries(groups).map(([date, sessions]) => `
+    <div class="history-day">
+      <div class="history-date${date === todayStr ? ' history-date-today' : ''}">
+        ${date === todayStr ? '今天' : date} · ${sessions.reduce((s, x) => s + x.duration, 0) > 3600 ? formatDurationShort(sessions.reduce((s, x) => s + x.duration, 0) * 1000) : ''}
+      </div>
+      ${sessions.map(s => `
+        <div class="session-item">
+          <div class="subject-dot" style="background:${getSubjectColor(s.subject)}"></div>
+          <div class="session-info">
+            <div class="session-subject">${esc(s.subject)}</div>
+            <div class="session-time">${fmtTime(s.startTime)} - ${fmtTime(s.endTime)}</div>
+          </div>
+          <span class="session-duration">${formatDurationShort(s.duration * 1000)}</span>
+          <button class="session-delete" data-id="${s.id}" title="删除">×</button>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+
+  panel.querySelectorAll('.session-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const data = load();
+      data.sessions = data.sessions.filter(s => s.id !== id);
+      save(data);
+      refreshAll();
+      showToast('🗑 记录已删除');
+    });
+  });
+}
+
+// ── Stats ──
+function renderStats() {
+  const data = load();
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+
+  const dayOfWeek = today.getDay() || 7;
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - (dayOfWeek - 1));
+  const monthStr = todayStr.slice(0, 7);
+
+  const todaySec = sumDuration(data.sessions.filter(s => s.startTime.slice(0, 10) === todayStr));
+  const weekSec = sumDuration(data.sessions.filter(s => s.startTime >= weekStart.toISOString().slice(0, 10)));
+  const monthSec = sumDuration(data.sessions.filter(s => s.startTime.slice(0, 7) === monthStr));
+
+  document.getElementById('statToday').textContent = formatDurationShort(todaySec * 1000);
+  document.getElementById('statWeek').textContent = formatDurationShort(weekSec * 1000);
+  document.getElementById('statMonth').textContent = formatDurationShort(monthSec * 1000);
+
+  drawChart(data);
+}
+
+function drawChart(data) {
+  const canvas = document.getElementById('chartCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const w = rect.width;
+  const h = 180;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const days = [];
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const ds = d.toISOString().slice(0, 10);
+    const sec = sumDuration(data.sessions.filter(s => s.startTime.slice(0, 10) === ds));
+    days.push({
+      label: i === 0 ? '今天' : `周${'日一二三四五六'[d.getDay()]}`,
+      seconds: sec,
+      isToday: i === 0
+    });
+  }
+
+  const maxSec = Math.max(...days.map(d => d.seconds), 3600);
+  const pad = { top: 12, right: 12, bottom: 26, left: 36 };
+  const chartW = w - pad.left - pad.right;
+  const chartH = h - pad.top - pad.bottom;
+  const barGap = 6;
+  const barW = (chartW - barGap * (days.length - 1)) / days.length;
+
+  // Grid
+  ctx.strokeStyle = '#eaecf0';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (chartH / 4) * i;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(w - pad.right, y);
+    ctx.stroke();
+    const val = (maxSec / 4) * (4 - i);
+    ctx.fillStyle = '#9098a5';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(formatDurationShort(val * 1000), pad.left - 6, y + 3);
+  }
+
+  // Bars
+  days.forEach((day, i) => {
+    const barH = Math.max((day.seconds / maxSec) * chartH, day.seconds > 0 ? 2 : 0);
+    const x = pad.left + i * (barW + barGap);
+    const y = pad.top + chartH - barH;
+    const radius = Math.min(4, barW / 2);
+
+    if (day.isToday) {
+      const grad = ctx.createLinearGradient(x, y, x, pad.top + chartH);
+      grad.addColorStop(0, '#5b6af0');
+      grad.addColorStop(1, '#8b5cf6');
+      ctx.fillStyle = grad;
+    } else {
+      ctx.fillStyle = '#dde0f0';
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + barW - radius, y);
+    ctx.quadraticCurveTo(x + barW, y, x + barW, y + radius);
+    ctx.lineTo(x + barW, pad.top + chartH);
+    ctx.lineTo(x, pad.top + chartH);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.fill();
+
+    // Value on bar
+    if (day.seconds >= 300) {
+      ctx.fillStyle = day.isToday ? '#fff' : '#5b6af0';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(formatDurationShort(day.seconds * 1000), x + barW / 2, y + 15);
+    }
+
+    // Label
+    ctx.fillStyle = '#9098a5';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(day.label, x + barW / 2, pad.top + chartH + 16);
+  });
+}
+
+function sumDuration(sessions) {
+  return sessions.reduce((sum, s) => sum + s.duration, 0);
+}
+
+// ── Goal ──
+function loadGoal() {
+  const data = load();
+  const goal = data.dailyGoal;
+  document.getElementById('goalHours').value = Math.floor(goal / 3600);
+  document.getElementById('goalMinutes').value = Math.floor((goal % 3600) / 60);
+}
+
+document.getElementById('btnSaveGoal').addEventListener('click', () => {
+  const h = parseInt(document.getElementById('goalHours').value) || 0;
+  const m = parseInt(document.getElementById('goalMinutes').value) || 0;
+  const goal = h * 3600 + m * 60;
+  const data = load();
+  data.dailyGoal = goal;
+  save(data);
+  updateProgress();
+  updateRing(getRunningMs());
+  showToast('🎯 目标已更新');
+});
+
+// ── Tabs ──
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const isHistory = tab.dataset.tab === 'history';
+    document.getElementById('historyPanel').style.display = isHistory ? '' : 'none';
+    document.getElementById('statsPanel').style.display = isHistory ? 'none' : '';
+    if (!isHistory) renderStats();
+  });
+});
+
+// ── Helpers ──
+function esc(s) {
+  const el = document.createElement('span');
+  el.textContent = s;
+  return el.innerHTML;
+}
+
+function fmtTime(iso) {
+  return new Date(iso).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ── Button bindings ──
+document.getElementById('btnStart').addEventListener('click', startTimer);
+document.getElementById('btnPause').addEventListener('click', pauseTimer);
+document.getElementById('btnStop').addEventListener('click', stopTimer);
+document.getElementById('btnReset').addEventListener('click', resetTimer);
+
+// ── Keyboard shortcuts ──
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') { e.preventDefault(); startTimer(); }
+  if (e.code === 'KeyP') { e.preventDefault(); pauseTimer(); }
+  if (e.code === 'KeyS' && !e.ctrlKey) { e.preventDefault(); stopTimer(); }
+});
+
+// ── Init ──
+function refreshAll() {
+  updateProgress();
+  renderHistory();
+}
+
+refreshAll();
+loadGoal();
+
+window.addEventListener('resize', () => {
+  const statsPanel = document.getElementById('statsPanel');
+  if (statsPanel.style.display !== 'none') drawChart(load());
+});
+</script>
+</body>
+</html>
