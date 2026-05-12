@@ -402,7 +402,13 @@ body {
 
 <script>
 // ── Auth ──
-const currentUser = JSON.parse(sessionStorage.getItem('user'));
+let currentUser = JSON.parse(sessionStorage.getItem('user'));
+if (!currentUser) {
+  const saved = localStorage.getItem('kimi-remembered-user');
+  if (saved) {
+    try { currentUser = JSON.parse(saved); sessionStorage.setItem('user', JSON.stringify(currentUser)); } catch(e) {}
+  }
+}
 if (!currentUser) { location.href = 'login.html'; }
 
 // ── Data ──
@@ -757,6 +763,7 @@ function refreshProfile() {
 
 document.getElementById('btnLogout').addEventListener('click', () => {
   sessionStorage.clear();
+  localStorage.removeItem('kimi-remembered-user');
   location.href = 'login.html';
 });
 

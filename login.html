@@ -89,6 +89,10 @@ body {
     <input type="password" id="password" placeholder="输入密码（至少4位）" autocomplete="current-password">
   </div>
 
+  <div style="display:flex;align-items:center;gap:6px;margin:12px 0;font-size:0.85rem;color:var(--muted)">
+    <input type="checkbox" id="rememberMe" style="width:16px;height:16px;accent-color:var(--green)">
+    <label for="rememberMe" style="cursor:pointer;font-weight:500">记住登录</label>
+  </div>
   <button class="btn btn-primary" id="btnSubmit">登 录</button>
   <div class="error-msg" id="errorMsg"></div>
   <div class="success-msg" id="successMsg"></div>
@@ -113,6 +117,30 @@ body {
   var successMsg = document.getElementById('successMsg');
 
   console.log('[login] page ready, mode:', mode);
+
+  // Auto-login check
+  (function() {
+    var saved = localStorage.getItem('kimi-remembered-user');
+    if (saved) {
+      try {
+        var user = JSON.parse(saved);
+        sessionStorage.setItem('user', JSON.stringify(user));
+        location.href = 'index.html';
+        return;
+      } catch(e) {}
+    }
+    // Also check if already logged in via session
+    if (sessionStorage.getItem('user')) {
+      location.href = 'index.html';
+    }
+  })();
+
+  function saveUser(user) {
+    sessionStorage.setItem('user', JSON.stringify(user));
+    if (document.getElementById('rememberMe').checked) {
+      localStorage.setItem('kimi-remembered-user', JSON.stringify(user));
+    }
+  }
 
   function getDeviceInfo() {
     var ua = navigator.userAgent;
@@ -236,7 +264,7 @@ body {
         var users = await regRes.json();
         console.log('[login] registered, user:', users[0].id);
         showSuccess('注册成功，正在跳转...');
-        sessionStorage.setItem('user', JSON.stringify(users[0]));
+        saveUser(users[0]);
         setTimeout(function() { location.href = 'index.html'; }, 500);
 
       } else {
@@ -259,7 +287,7 @@ body {
 
         console.log('[login] login ok');
         showSuccess('登录成功，正在跳转...');
-        sessionStorage.setItem('user', JSON.stringify(users[0]));
+        saveUser(users[0]);
         setTimeout(function() { location.href = 'index.html'; }, 500);
       }
     } catch (err) {
