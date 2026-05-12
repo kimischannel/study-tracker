@@ -72,11 +72,11 @@ body {
 <div class="login-wrap">
   <div class="logo">&#x1F4D6;</div>
   <h1 id="modeTitle">登录</h1>
-  <div class="sub" id="modeSub">使用手机号登录学习计时</div>
+  <div class="sub" id="modeSub">使用邮箱登录学习计时</div>
 
   <div class="field">
-    <label>手机号</label>
-    <input type="tel" id="phone" placeholder="输入手机号" maxlength="11" autocomplete="tel">
+    <label>邮箱</label>
+    <input type="email" id="email" placeholder="输入邮箱地址" autocomplete="email">
   </div>
 
   <div class="field name-field hidden" id="nameField">
@@ -101,7 +101,7 @@ body {
   var SUPABASE_KEY = 'sb_publishable_0r9JoiUqOggGX7Cum1gjtQ_WEkBE2Sp';
   var mode = 'login';
 
-  var phoneEl = document.getElementById('phone');
+  var emailEl = document.getElementById('email');
   var nameEl = document.getElementById('name');
   var passwordEl = document.getElementById('password');
   var nameFieldEl = document.getElementById('nameField');
@@ -163,7 +163,7 @@ body {
       nameFieldEl.classList.remove('hidden');
     } else {
       modeTitle.textContent = '登录';
-      modeSub.textContent = '使用手机号登录学习计时';
+      modeSub.textContent = '使用邮箱登录学习计时';
       btnSubmit.textContent = '登 录';
       btnToggle.textContent = '还没有账号？点此注册';
       nameFieldEl.classList.add('hidden');
@@ -179,26 +179,26 @@ body {
 
   // Submit
   btnSubmit.addEventListener('click', async function() {
-    var phone = phoneEl.value.trim();
+    var email = emailEl.value.trim();
     var password = passwordEl.value;
     var name = nameEl.value.trim();
 
     errorMsg.style.display = 'none';
     successMsg.style.display = 'none';
 
-    if (!phone || phone.length < 11) { showError('请输入正确的手机号（11位）'); return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('请输入正确的邮箱地址'); return; }
     if (mode === 'register' && !name) { showError('请输入你的名字'); return; }
     if (!password || password.length < 4) { showError('密码至少4位'); return; }
 
     setLoading(true);
-    console.log('[login] submit, mode:', mode, 'phone:', phone);
+    console.log('[login] submit, mode:', mode, 'email:', email);
 
     try {
       if (mode === 'register') {
-        // Check if phone exists
-        var checkUrl = SUPABASE_URL + '/rest/v1/users?phone=eq.' + encodeURIComponent(phone) + '&select=id&limit=1';
+        // Check if email exists
+        var checkUrl = SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(email) + '&select=id&limit=1';
         var checkRes = await fetch(checkUrl, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } });
-        console.log('[login] check phone status:', checkRes.status);
+        console.log('[login] check email status:', checkRes.status);
 
         if (!checkRes.ok) {
           var checkErr = await checkRes.text();
@@ -207,12 +207,12 @@ body {
         }
 
         var existing = await checkRes.json();
-        if (existing.length > 0) { showError('该手机号已注册，请直接登录'); setLoading(false); return; }
+        if (existing.length > 0) { showError('该邮箱已注册，请直接登录'); setLoading(false); return; }
 
         // Register
         var pHash = await hashPassword(password);
         var deviceInfo = getDeviceInfo();
-        var body = JSON.stringify({ phone: phone, name: name, password_hash: pHash, device_info: deviceInfo });
+        var body = JSON.stringify({ email: email, name: name, password_hash: pHash, device_info: deviceInfo });
         console.log('[login] registering...');
 
         var regRes = await fetch(SUPABASE_URL + '/rest/v1/users', {
@@ -241,7 +241,7 @@ body {
 
       } else {
         // Login
-        var loginUrl = SUPABASE_URL + '/rest/v1/users?phone=eq.' + encodeURIComponent(phone) + '&select=*&limit=1';
+        var loginUrl = SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(email) + '&select=*&limit=1';
         var loginRes = await fetch(loginUrl, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } });
         console.log('[login] login status:', loginRes.status);
 
@@ -273,7 +273,7 @@ body {
   passwordEl.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') btnSubmit.click();
   });
-  phoneEl.addEventListener('keydown', function(e) {
+  emailEl.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') passwordEl.focus();
   });
   nameEl.addEventListener('keydown', function(e) {
