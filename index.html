@@ -7,12 +7,13 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --green: #059669; --green-hover: #047857; --green-light: #ecfdf5;
-  --green-glow: rgba(5,150,105,0.15); --red: #ef4444; --amber: #f59e0b;
-  --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b;
-  --border: #e2e8f0; --border-light: #f1f5f9;
-  --radius-lg: 20px; --radius-md: 14px; --radius-sm: 10px;
-  --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+  --green: #10b981; --green-hover: #34d399; --green-muted: rgba(16,185,129,0.12);
+  --green-glow: rgba(16,185,129,0.2); --red: #f87171; --amber: #fbbf24;
+  --bg: #09090b; --bg-elevated: #131316; --card: #18181b;
+  --text: #fafafa; --text-secondary: #a1a1aa; --muted: #71717a;
+  --border: #27272a; --border-subtle: #1f1f23;
+  --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+  --shadow: 0 1px 2px rgba(0,0,0,0.3);
   --nav-height: 68px;
 }
 html { font-size: 16px; }
@@ -23,142 +24,149 @@ body {
   min-height: 100vh;
   padding-bottom: var(--nav-height);
   -webkit-font-smoothing: antialiased;
-  background-image: radial-gradient(ellipse 80% 50% at 50% -20%, #d1fae5 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, #ecfdf5 0%, transparent 50%);
-  background-attachment: fixed;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
 }
-.app { max-width: 500px; margin: 0 auto; padding: 20px 16px 0; }
+.app { max-width: 500px; margin: 0 auto; padding: 24px 16px 0; }
 
 /* Header */
-.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-.header-left { display: flex; align-items: center; gap: 10px; }
-.avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; color: #fff; flex-shrink: 0; }
-.header-title { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; }
-.header-date { font-size: 0.75rem; color: var(--muted); }
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; color: #fff; flex-shrink: 0; }
+.header-title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; }
+.header-date { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.02em; }
 
 /* Bottom Nav */
 .bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 500px; height: var(--nav-height);
-  background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-light);
+  background: rgba(19,19,22,0.94); backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-around;
   z-index: 100; padding-bottom: env(safe-area-inset-bottom);
 }
 .nav-item {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
-  font-size: 0.7rem; font-weight: 600; color: var(--muted);
-  cursor: pointer; transition: color 0.2s; padding: 6px 12px; border-radius: 10px;
-  -webkit-tap-highlight-color: transparent; user-select: none;
+  font-size: 0.65rem; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: all 0.2s; padding: 6px 14px; border-radius: 10px;
+  -webkit-tap-highlight-color: transparent; user-select: none; letter-spacing: 0.03em;
 }
-.nav-item .nav-icon { font-size: 1.3rem; transition: transform 0.2s; }
-.nav-item.active { color: var(--green); }
-.nav-item.active .nav-icon { transform: scale(1.1); }
-.nav-item:active { background: #f1f5f9; }
+.nav-item .nav-icon { font-size: 1.15rem; transition: transform 0.2s; opacity: 0.5; }
+.nav-item.active { color: var(--text); }
+.nav-item.active .nav-icon { transform: scale(1.05); opacity: 1; }
+.nav-item:active { background: var(--border-subtle); }
 
 /* Panels */
-.panel { display: none; }
+.panel { display: none; animation: fadeIn 0.25s ease; }
 .panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Card */
 .card {
   background: var(--card); border-radius: var(--radius-lg);
   padding: 22px 20px; box-shadow: var(--shadow);
-  border: 1px solid var(--border-light); margin-bottom: 14px;
+  border: 1px solid var(--border); margin-bottom: 12px;
+}
+
+/* Section label */
+.section-label {
+  font-size: 0.65rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;
 }
 
 /* Timer */
-.timer-ring-wrap { position: relative; display: inline-block; margin: 8px 0 18px; }
+.timer-ring-wrap { position: relative; display: inline-block; margin: 4px 0 16px; }
 .timer-ring { transform: rotate(-90deg); }
-.timer-ring-bg { fill: none; stroke: var(--border); stroke-width: 5; }
-.timer-ring-fg { fill: none; stroke: var(--green); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.4s ease; filter: drop-shadow(0 0 6px rgba(5,150,105,0.3)); }
-.timer-ring-fg.active { filter: drop-shadow(0 0 10px rgba(5,150,105,0.5)); }
+.timer-ring-bg { fill: none; stroke: var(--border); stroke-width: 4; }
+.timer-ring-fg { fill: none; stroke: var(--green); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.4s ease; filter: drop-shadow(0 0 8px rgba(16,185,129,0.4)); }
+.timer-ring-fg.active { filter: drop-shadow(0 0 14px rgba(16,185,129,0.6)); }
 .timer-display {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  font-size: 2.4rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+  font-size: 2.3rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.03em;
 }
 .timer-display.active { color: var(--green); }
 .timer-center { text-align: center; }
 
 .subject-input {
-  width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-  padding: 12px 14px; font-size: 0.9rem; outline: none; transition: all 0.25s;
-  background: #fafbfc; font-weight: 500; margin-bottom: 12px;
+  width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 16px; font-size: 0.9rem; outline: none; transition: all 0.2s;
+  background: var(--bg-elevated); font-weight: 500; color: var(--text); margin-bottom: 12px;
 }
-.subject-input:focus { border-color: var(--green); background: #fff; box-shadow: 0 0 0 4px var(--green-glow); }
-.subject-input::placeholder { color: #cbd5e1; }
+.subject-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-muted); }
+.subject-input::placeholder { color: #52525b; }
 
 .btn-row { display: flex; gap: 8px; justify-content: center; }
 .btn {
-  display: inline-flex; align-items: center; gap: 5px; padding: 11px 22px;
-  border-radius: 24px; font-size: 0.9rem; font-weight: 700; border: none;
-  cursor: pointer; transition: all 0.2s; user-select: none; -webkit-tap-highlight-color: transparent;
+  display: inline-flex; align-items: center; gap: 5px; padding: 10px 20px;
+  border-radius: 22px; font-size: 0.85rem; font-weight: 600; border: none;
+  cursor: pointer; transition: all 0.15s; user-select: none; -webkit-tap-highlight-color: transparent;
 }
-.btn:active:not(:disabled) { transform: scale(0.95); }
-.btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.btn-green { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.25); }
+.btn:active:not(:disabled) { transform: scale(0.96); }
+.btn:disabled { opacity: 0.25; cursor: not-allowed; }
+.btn-green { background: var(--green); color: #000; }
 .btn-green:hover:not(:disabled) { background: var(--green-hover); }
-.btn-amber { background: var(--amber); color: #fff; }
-.btn-red { background: #fff; color: var(--red); border: 1.5px solid var(--red); }
-.btn-ghost { background: #f1f5f9; color: var(--muted); }
-.btn-ghost:hover { background: #e2e8f0; color: var(--text); }
+.btn-amber { background: var(--amber); color: #000; }
+.btn-red { background: transparent; color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+.btn-red:hover:not(:disabled) { border-color: var(--red); background: rgba(248,113,113,0.08); }
+.btn-ghost { background: var(--bg-elevated); color: var(--muted); }
+.btn-ghost:hover { background: var(--border); color: var(--text-secondary); }
 
 /* Progress bar */
 .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.progress-label { font-size: 0.8rem; font-weight: 700; width: 36px; flex-shrink: 0; }
-.progress-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+.progress-label { font-size: 0.8rem; font-weight: 600; width: 36px; flex-shrink: 0; color: var(--text-secondary); }
+.progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
 .progress-fill.green { background: linear-gradient(90deg, #059669, #10b981); }
-.progress-fill.blue { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-.progress-fill.amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-.progress-val { font-size: 0.8rem; font-weight: 700; width: 60px; text-align: right; color: var(--muted); white-space: nowrap; }
+.progress-fill.blue { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+.progress-fill.amber { background: linear-gradient(90deg, #d97706, #fbbf24); }
+.progress-val { font-size: 0.78rem; font-weight: 600; width: 60px; text-align: right; color: var(--muted); white-space: nowrap; }
 
-/* 888 Card */
-.triple-progress { margin-bottom: 16px; }
-.triple-header { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+/* 888 Card separator */
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 
 .input-row { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
-.input-row label { font-size: 0.8rem; font-weight: 600; white-space: nowrap; color: var(--muted); }
+.input-row label { font-size: 0.8rem; font-weight: 600; white-space: nowrap; color: var(--text-secondary); }
 .num-input {
-  width: 56px; border: 1.5px solid var(--border); border-radius: 8px;
-  padding: 8px 4px; font-size: 0.9rem; text-align: center; font-weight: 700;
-  outline: none; background: #fafbfc; transition: all 0.2s;
+  width: 56px; border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 4px; font-size: 0.9rem; text-align: center; font-weight: 600;
+  outline: none; background: var(--bg-elevated); color: var(--text); transition: all 0.2s;
 }
-.num-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow); background: #fff; }
+.num-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-muted); }
 .unit { font-size: 0.8rem; color: var(--muted); }
 
 .btn-sm {
-  padding: 8px 16px; font-size: 0.8rem; font-weight: 700; border-radius: 18px;
-  border: none; cursor: pointer; transition: all 0.2s;
-  background: var(--green); color: #fff; -webkit-tap-highlight-color: transparent;
+  padding: 7px 16px; font-size: 0.78rem; font-weight: 600; border-radius: 16px;
+  border: none; cursor: pointer; transition: all 0.15s;
+  background: var(--green); color: #000; -webkit-tap-highlight-color: transparent;
 }
-.btn-sm:active { transform: scale(0.95); }
+.btn-sm:active { transform: scale(0.96); }
 .btn-sm:hover { background: var(--green-hover); }
 
 /* Diary */
-.diary-date { font-size: 0.85rem; font-weight: 700; color: var(--muted); margin-bottom: 12px; }
+.diary-date { font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 12px; }
 .diary-textarea {
-  width: 100%; min-height: 120px; border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm); padding: 12px 14px; font-size: 0.9rem;
-  outline: none; resize: vertical; font-family: inherit; background: #fafbfc;
+  width: 100%; min-height: 120px; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 16px; font-size: 0.9rem;
+  outline: none; resize: vertical; font-family: inherit; background: var(--bg-elevated); color: var(--text);
   transition: all 0.2s;
 }
-.diary-textarea:focus { border-color: var(--green); box-shadow: 0 0 0 4px var(--green-glow); background: #fff; }
-.diary-list { margin-top: 16px; }
+.diary-textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-muted); }
+.diary-textarea::placeholder { color: #52525b; }
+.diary-list { margin-top: 12px; }
 .diary-item {
-  padding: 14px; border-radius: var(--radius-sm); margin-bottom: 8px;
-  background: var(--bg); border: 1px solid var(--border-light);
+  padding: 16px; border-radius: var(--radius-sm); margin-bottom: 6px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
 }
-.diary-item-date { font-size: 0.75rem; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
-.diary-item-text { font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; }
+.diary-item-date { font-size: 0.7rem; color: var(--muted); font-weight: 600; margin-bottom: 6px; letter-spacing: 0.03em; }
+.diary-item-text { font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; color: var(--text-secondary); }
 .diary-item-del {
-  background: none; border: none; color: #cbd5e1; cursor: pointer;
-  font-size: 1.1rem; float: right; padding: 2px 6px; border-radius: 6px;
+  background: none; border: none; color: #52525b; cursor: pointer;
+  font-size: 1.1rem; float: right; padding: 2px 6px; border-radius: 6px; transition: all 0.15s;
 }
-.diary-item-del:hover { color: var(--red); background: #fef2f2; }
-.diary-photo-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
-.diary-photo { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-light); }
+.diary-item-del:hover { color: var(--red); background: rgba(248,113,113,0.08); }
+.diary-photo-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.diary-photo { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
 .diary-photo-wrap { position: relative; display: inline-block; }
 .diary-photo-del {
   position: absolute; top: -6px; right: -6px; width: 20px; height: 20px;
@@ -166,60 +174,78 @@ body {
   font-size: 12px; cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center;
 }
 .btn-camera {
-  display: inline-flex; align-items: center; gap: 4px; padding: 7px 14px;
-  border-radius: 16px; font-size: 0.8rem; font-weight: 600; border: 1.5px dashed var(--border);
-  background: #fafbfc; color: var(--muted); cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px;
+  border-radius: 16px; font-size: 0.78rem; font-weight: 600; border: 1px dashed #3f3f46;
+  background: transparent; color: var(--muted); cursor: pointer; transition: all 0.2s;
   -webkit-tap-highlight-color: transparent; user-select: none;
 }
 .btn-camera:hover { border-color: var(--green); color: var(--green); }
 
 /* Sleep */
-.sleep-card { text-align: center; }
-.sleep-row { display: flex; gap: 12px; justify-content: center; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
 .sleep-field { text-align: left; }
-.sleep-field label { font-size: 0.75rem; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.sleep-field label { font-size: 0.7rem; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
 .sleep-field input {
-  width: 130px; border: 1.5px solid var(--border); border-radius: 8px;
-  padding: 10px 12px; font-size: 0.95rem; outline: none; background: #fafbfc; font-weight: 600;
+  width: 130px; border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 12px; font-size: 0.95rem; outline: none; background: var(--bg-elevated); color: var(--text); font-weight: 600;
 }
-.sleep-field input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow); background: #fff; }
-.sleep-result { font-size: 1rem; font-weight: 700; color: var(--green); margin-bottom: 12px; }
-.sleep-badge { display: inline-block; padding: 4px 14px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; }
-.sleep-badge.good { background: var(--green-light); color: var(--green); }
-.sleep-badge.warn { background: #fef3c7; color: #d97706; }
-.sleep-badge.bad { background: #fef2f2; color: var(--red); }
+.sleep-field input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-muted); }
+.sleep-result { font-size: 0.9rem; font-weight: 600; margin-bottom: 10px; }
+.sleep-badge { display: inline-block; padding: 3px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+.sleep-badge.good { background: var(--green-muted); color: var(--green); }
+.sleep-badge.warn { background: rgba(251,191,36,0.12); color: var(--amber); }
+.sleep-badge.bad { background: rgba(248,113,113,0.12); color: var(--red); }
 
 /* Daily Summary */
-.summary-grid { display: flex; gap: 10px; margin-bottom: 16px; }
+.summary-grid { display: flex; gap: 8px; margin-bottom: 16px; }
 .summary-item {
-  flex: 1; text-align: center; background: var(--green-light); border-radius: var(--radius-md);
-  padding: 16px 8px;
+  flex: 1; text-align: center; background: var(--bg-elevated); border-radius: var(--radius-md);
+  padding: 18px 8px; border: 1px solid var(--border);
 }
-.summary-icon { font-size: 1.2rem; margin-bottom: 4px; }
-.summary-num { font-size: 1.1rem; font-weight: 800; color: var(--green); }
-.summary-label { font-size: 0.68rem; color: var(--muted); margin-top: 2px; font-weight: 600; }
+.summary-icon { font-size: 0.8rem; margin-bottom: 6px; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 700; }
+.summary-num { font-size: 1.3rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+.summary-label { font-size: 0.65rem; color: var(--muted); margin-top: 3px; font-weight: 500; }
 
 /* Toast */
 .toast {
   position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(120px);
-  background: #0f172a; color: #fff; padding: 12px 28px; border-radius: 28px;
-  font-size: 0.85rem; font-weight: 600; opacity: 0; transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
-  pointer-events: none; z-index: 200; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  background: #27272a; color: #fafafa; padding: 11px 24px; border-radius: 22px;
+  font-size: 0.8rem; font-weight: 600; opacity: 0; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  pointer-events: none; z-index: 200; box-shadow: 0 8px 32px rgba(0,0,0,0.4); border: 1px solid #3f3f46;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-.empty { text-align: center; color: var(--muted); padding: 32px 0; font-size: 0.85rem; }
+.empty { text-align: center; color: var(--muted); padding: 32px 0; font-size: 0.8rem; }
 
 /* Profile */
 .profile-section { margin-bottom: 20px; }
-.profile-email { font-size: 0.85rem; color: var(--muted); }
-.profile-stat { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-light); font-size: 0.9rem; }
+.profile-email { font-size: 0.8rem; color: var(--muted); }
+.profile-stat { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; color: var(--text-secondary); }
+.profile-stat span:last-child { color: var(--text); }
+
+/* Inline pill */
+.inline-pill {
+  display: inline-block; padding: 2px 10px; border-radius: 10px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em;
+  background: var(--green-muted); color: var(--green);
+}
+
+/* Recent sessions in timer */
+.session-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px;
+  border-radius: 8px; margin-bottom: 1px; transition: background 0.15s;
+}
+.session-row:hover { background: var(--bg-elevated); }
+.session-row .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.session-row .name { font-size: 0.85rem; font-weight: 600; }
+.session-row .time { font-size: 0.7rem; color: var(--muted); }
+.session-row .duration { font-size: 0.85rem; font-weight: 700; color: var(--green); }
+.session-row .del { background: none; border: none; color: #52525b; cursor: pointer; font-size: 1rem; padding: 2px 6px; border-radius: 4px; }
 
 @media (max-width: 400px) {
-  .app { padding: 14px 10px 0; }
+  .app { padding: 18px 10px 0; }
   .card { padding: 16px 14px; }
   .timer-display { font-size: 2rem; }
-  .btn { padding: 10px 16px; font-size: 0.8rem; }
+  .btn { padding: 9px 16px; font-size: 0.8rem; }
 }
 </style>
 </head>
@@ -260,7 +286,7 @@ body {
     <!-- Today progress -->
     <div class="card">
       <div class="progress-row">
-        <span class="progress-label" style="width:auto;flex:1">📖 今日学习</span>
+        <span class="progress-label" style="width:auto;flex:1">Today's Study</span>
         <span class="progress-val" id="todayStudy">0h 0m</span>
         <span style="font-size:0.75rem;color:var(--muted)">/ 目标 8h</span>
       </div>
@@ -269,7 +295,7 @@ body {
 
     <!-- Recent sessions -->
     <div class="card" id="recentSessions" style="max-height:260px;overflow-y:auto">
-      <div style="font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">📋 近期记录</div>
+      <div class="section-label">Recent</div>
       <div id="recentList"></div>
     </div>
   </div>
@@ -277,20 +303,20 @@ body {
   <!-- ===== 888 Panel ===== -->
   <div class="panel" id="panel888">
     <div class="card">
-      <div class="triple-header">📊 今日 8 小时学习计划</div>
+      <div class="section-label">8-Hour Plan</div>
       <div class="triple-progress">
         <div class="progress-row">
-          <span class="progress-label">😴</span>
+          <span class="progress-label" style="width:auto">Sleep</span>
           <div class="progress-track"><div class="progress-fill blue" id="barSleep" style="width:0%"></div></div>
           <span class="progress-val" id="valSleep">0h / 8h</span>
         </div>
         <div class="progress-row">
-          <span class="progress-label">📖</span>
+          <span class="progress-label" style="width:auto">Study</span>
           <div class="progress-track"><div class="progress-fill green" id="barStudy888" style="width:0%"></div></div>
           <span class="progress-val" id="valStudy888">0h / 8h</span>
         </div>
         <div class="progress-row">
-          <span class="progress-label">🎮</span>
+          <span class="progress-label" style="width:auto">Leisure</span>
           <div class="progress-track"><div class="progress-fill amber" id="barLeisure" style="width:0%"></div></div>
           <span class="progress-val" id="valLeisure">0h / 8h</span>
         </div>
@@ -298,7 +324,7 @@ body {
 
       <!-- Sleep input -->
       <div style="border-top:1px solid var(--border-light);padding-top:14px;margin-bottom:14px">
-        <div style="font-size:0.8rem;font-weight:700;color:var(--muted);margin-bottom:10px">😴 填写睡眠时间</div>
+        <div class="section-label">Sleep</div>
         <div class="input-row">
           <label>入睡</label>
           <input class="num-input" id="sleepStart" type="time" value="23:00">
@@ -311,7 +337,7 @@ body {
 
       <!-- Leisure input -->
       <div style="border-top:1px solid var(--border-light);padding-top:14px;margin-bottom:14px">
-        <div style="font-size:0.8rem;font-weight:700;color:var(--muted);margin-bottom:10px">🎮 填写休闲时间（含健身/游泳）</div>
+        <div class="section-label">Leisure &amp; Fitness</div>
         <div class="input-row">
           <input class="num-input" id="leisureHours" type="number" min="0" max="24" value="0" style="width:60px">
           <label>小时</label>
@@ -324,25 +350,25 @@ body {
 
     <!-- Daily summary -->
     <div class="card">
-      <div class="triple-header">📅 今日完成情况</div>
+      <div class="section-label">Today's Summary</div>
       <div class="summary-grid">
         <div class="summary-item">
-          <div class="summary-icon">😴</div>
+          <div class="summary-icon">Sleep</div>
           <div class="summary-num" id="sumSleep">0h</div>
-          <div class="summary-label">睡眠</div>
+          <div class="summary-label">/ 8h</div>
         </div>
         <div class="summary-item">
-          <div class="summary-icon">📖</div>
+          <div class="summary-icon">Study</div>
           <div class="summary-num" id="sumStudy">0h</div>
-          <div class="summary-label">学习</div>
+          <div class="summary-label">/ 8h</div>
         </div>
         <div class="summary-item">
-          <div class="summary-icon">🎮</div>
+          <div class="summary-icon">Leisure</div>
           <div class="summary-num" id="sumLeisure">0h</div>
-          <div class="summary-label">休闲</div>
+          <div class="summary-label">/ 8h</div>
         </div>
       </div>
-      <div style="text-align:center;font-size:0.85rem;font-weight:700;color:var(--muted)" id="summaryMsg">今天也要加油哦 💪</div>
+      <div style="text-align:center;font-size:0.8rem;font-weight:500;color:var(--muted)" id="summaryMsg">Start tracking your day.</div>
     </div>
   </div>
 
@@ -353,7 +379,7 @@ body {
       <textarea class="diary-textarea" id="diaryText" placeholder="写点什么……"></textarea>
       <div class="diary-photo-row" id="diaryPhotos"></div>
       <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
-        <button class="btn-camera" id="btnCamera">📷 拍照</button>
+        <button class="btn-camera" id="btnCamera">Camera</button>
         <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
         <button class="btn-sm" id="btnSaveDiary">保存日记</button>
       </div>
@@ -387,16 +413,16 @@ body {
 <!-- Bottom Nav -->
 <nav class="bottom-nav">
   <div class="nav-item active" data-tab="timer">
-    <span class="nav-icon">⏱️</span>计时
+    <span class="nav-icon">&#x25CB;</span>计时
   </div>
   <div class="nav-item" data-tab="888">
-    <span class="nav-icon">📊</span>8小时
+    <span class="nav-icon">&#x25D0;</span>计划
   </div>
   <div class="nav-item" data-tab="diary">
-    <span class="nav-icon">📝</span>日记
+    <span class="nav-icon">&#x25A7;</span>日记
   </div>
   <div class="nav-item" data-tab="profile">
-    <span class="nav-icon">👤</span>我的
+    <span class="nav-icon">&#x25CE;</span>我的
   </div>
 </nav>
 
@@ -517,7 +543,7 @@ function stop() {
   save(data);
   saveRemote(data.sessions[data.sessions.length - 1]);
   pausedMs = 0; phaseStart = null; tick(); setTimerUI(false); refreshTimer(); refreshAll();
-  toast('✅ 学习记录已保存');
+  toast('Session saved');
 }
 function reset() {
   clearInterval(timerInterval); timerInterval = null; pausedMs = 0; phaseStart = null; tick(); setTimerUI(false);
@@ -539,7 +565,7 @@ function refreshTimer() {
   const sorted = [...data.sessions].sort((a, b) => new Date(b.startTime) - new Date(a.startTime)).slice(0, 10);
   const list = document.getElementById('recentList');
   if (!sorted.length) {
-    list.innerHTML = '<div class="empty">还没有学习记录</div>';
+    list.innerHTML = '<div class="empty">No sessions yet</div>';
   } else {
     const SUBJECT_COLORS = ['#059669','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899'];
     const colorCache = {};
@@ -561,7 +587,7 @@ function refreshTimer() {
     list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
       const d = load(); d.sessions = d.sessions.filter(s => s.id !== b.dataset.del); save(d);
       deleteRemoteSession(b.dataset.del);
-      refreshTimer(); refreshAll(); toast('已删除');
+      refreshTimer(); refreshAll(); toast('Deleted');
     }));
   }
 }
@@ -595,8 +621,8 @@ function refresh888() {
 
   const all8 = sleepH >= 8 && studyH >= 8 && leisureH >= 8;
   const any = sleepH > 0 || studyH > 0 || leisureH > 0;
-  document.getElementById('summaryMsg').textContent = all8 ? '✨ 今日 8 小时学习计划全部达标！' : any ? '继续加油，你可以的 💪' : '今天也要加油哦 💪';
-  document.getElementById('daySummary').textContent = any ? `😴${sleepH.toFixed(0)}h 📖${studyH.toFixed(0)}h 🎮${leisureH.toFixed(0)}h` : '';
+  document.getElementById('summaryMsg').textContent = all8 ? 'All targets met — great work.' : any ? 'Keep going.' : 'Start tracking your day.';
+  document.getElementById('daySummary').textContent = any ? `S ${sleepH.toFixed(0)}h · L ${studyH.toFixed(0)}h · P ${leisureH.toFixed(0)}h` : '';
 
   // Sleep calc
   calcSleep();
@@ -631,7 +657,7 @@ document.getElementById('btnSaveSleep').addEventListener('click', () => {
   const entry = { date: today, start: s, end: e, hours: mins / 60 };
   if (idx >= 0) data.sleepLog[idx] = entry; else data.sleepLog.push(entry);
   save(data); refresh888(); refreshAll();
-  toast('😴 睡眠时间已保存');
+  toast('Sleep saved');
 });
 
 document.getElementById('btnSaveLeisure').addEventListener('click', () => {
@@ -644,7 +670,7 @@ document.getElementById('btnSaveLeisure').addEventListener('click', () => {
   const entry = { date: today, hours: total };
   if (idx >= 0) data.leisureLog[idx] = entry; else data.leisureLog.push(entry);
   save(data); refresh888(); refreshAll();
-  toast('🎮 休闲时间已保存');
+  toast('Leisure saved');
 });
 
 // ── Diary ──
@@ -711,7 +737,7 @@ function refreshDiary() {
   const list = document.getElementById('diaryList');
   const sorted = [...data.diary].sort((a, b) => b.date.localeCompare(a.date));
   if (!sorted.length) {
-    list.innerHTML = '<div class="card"><div class="empty">📝 还没有日记</div></div>';
+    list.innerHTML = '<div class="card"><div class="empty">No entries yet</div></div>';
   } else {
     list.innerHTML = sorted.map(d => `
       <div class="card diary-item">
@@ -723,7 +749,7 @@ function refreshDiary() {
     `).join('');
     list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
       const d2 = load(); d2.diary = d2.diary.filter(x => x.id !== b.dataset.del); save(d2);
-      refreshDiary(); refreshAll(); toast('日记已删除');
+      refreshDiary(); refreshAll(); toast('Deleted');
     }));
   }
 }
@@ -741,7 +767,7 @@ document.getElementById('btnSaveDiary').addEventListener('click', () => {
   };
   if (idx >= 0) { data.diary[idx] = entry; } else { data.diary.push(entry); }
   save(data); refreshDiary(); refreshAll();
-  toast('✅ 日记已保存');
+  toast('Diary saved');
 });
 
 // ── Profile ──
@@ -776,7 +802,7 @@ function refreshAll() {
   const sleepH = (data.sleepLog.find(s => s.date === today) || {}).hours || 0;
   const studyH = data.sessions.filter(s => s.startTime.slice(0, 10) === today).reduce((a, s) => a + s.duration, 0) / 3600;
   const leisureH = (data.leisureLog.find(l => l.date === today) || {}).hours || 0;
-  document.getElementById('daySummary').textContent = `😴${sleepH.toFixed(0)}h 📖${studyH.toFixed(0)}h 🎮${leisureH.toFixed(0)}h`;
+  document.getElementById('daySummary').textContent = `S ${sleepH.toFixed(0)}h · L ${studyH.toFixed(0)}h · P ${leisureH.toFixed(0)}h`;
 }
 
 // Init
@@ -836,7 +862,7 @@ document.addEventListener('keydown', e => {
       const sleepH = (data.sleepLog.find(s => s.date === today) || {}).hours || 0;
       const leisureH = (data.leisureLog.find(l => l.date === today) || {}).hours || 0;
       const all8 = sleepH >= 8 && studyH >= 8 && leisureH >= 8;
-      toast('🕘 9点结算：' + (all8 ? '🎉 8小时全部达标！' : '还有进步空间，明天继续加油！'));
+      toast('9 PM — ' + (all8 ? 'All 8h targets met.' : 'Keep it up tomorrow.'));
     }
   }
   setInterval(check9pm, 60000);

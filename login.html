@@ -7,70 +7,67 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --green: #059669; --green-hover: #047857; --red: #ef4444;
-  --bg: #f8fafc; --card: #fff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0;
+  --green: #10b981; --green-hover: #34d399; --red: #f87171;
+  --bg: #09090b; --card: #18181b; --text: #fafafa; --muted: #71717a; --border: #27272a;
 }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #f8fafc;
-  background-image: radial-gradient(ellipse 80% 50% at 50% -20%, #d1fae5 0%, transparent 60%);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
   color: var(--text); min-height: 100vh;
   display: flex; justify-content: center; align-items: center;
   padding: 24px; -webkit-font-smoothing: antialiased;
 }
 .login-wrap {
   width: 100%; max-width: 400px; background: var(--card);
-  border-radius: 20px; padding: 40px 32px 36px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
-  border: 1px solid #f1f5f9; text-align: center;
+  border-radius: 16px; padding: 40px 32px 36px;
+  border: 1px solid var(--border); text-align: center;
 }
 .logo {
-  width: 64px; height: 64px; border-radius: 18px;
+  width: 48px; height: 48px; border-radius: 12px;
   background: linear-gradient(135deg, #059669, #10b981);
   display: inline-flex; align-items: center; justify-content: center;
-  font-size: 2rem; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(5,150,105,0.25);
+  font-size: 1.4rem; margin-bottom: 16px; font-weight: 700; color: #000;
 }
-.login-wrap h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.03em; }
-.login-wrap .sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 28px; }
+.login-wrap h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.02em; }
+.login-wrap .sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 28px; }
 
 .field { margin-bottom: 16px; text-align: left; }
-.field label { font-size: 0.8rem; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.field label { font-size: 0.7rem; font-weight: 600; color: var(--muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
 .field input {
-  width: 100%; padding: 12px 16px; border: 1.5px solid var(--border);
-  border-radius: 12px; font-size: 1rem; outline: none; transition: all 0.2s;
-  background: #fafbfc; font-weight: 500; color: var(--text);
+  width: 100%; padding: 12px 16px; border: 1px solid var(--border);
+  border-radius: 10px; font-size: 0.95rem; outline: none; transition: all 0.2s;
+  background: #131316; font-weight: 500; color: var(--text);
 }
-.field input:focus { border-color: var(--green); box-shadow: 0 0 0 4px rgba(5,150,105,0.1); background: #fff; }
+.field input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
 
 .btn {
-  width: 100%; padding: 13px; border-radius: 14px; font-size: 1rem; font-weight: 700;
-  border: none; cursor: pointer; transition: all 0.2s; margin-top: 8px; letter-spacing: -0.01em;
+  width: 100%; padding: 12px; border-radius: 12px; font-size: 0.95rem; font-weight: 600;
+  border: none; cursor: pointer; transition: all 0.15s; margin-top: 8px; letter-spacing: -0.01em;
 }
-.btn-primary { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.25); }
+.btn-primary { background: var(--green); color: #000; }
 .btn-primary:hover:not(:disabled) { background: var(--green-hover); }
 .btn-primary:active:not(:disabled) { transform: scale(0.97); }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-ghost {
-  background: none; color: var(--muted); font-size: 0.85rem; margin-top: 12px; padding: 8px;
+  background: none; color: var(--muted); font-size: 0.8rem; margin-top: 12px; padding: 8px;
 }
 .btn-ghost:hover { color: var(--text); }
 
 .error-msg {
-  color: var(--red); font-size: 0.85rem; margin-top: 12px; padding: 8px 12px;
-  background: #fef2f2; border-radius: 8px; display: none; text-align: center;
+  color: var(--red); font-size: 0.8rem; margin-top: 12px; padding: 8px 12px;
+  background: rgba(248,113,113,0.1); border-radius: 8px; display: none; text-align: center;
 }
 .success-msg {
-  color: var(--green); font-size: 0.85rem; margin-top: 12px; padding: 8px 12px;
-  background: #f0fdf4; border-radius: 8px; display: none; text-align: center;
+  color: var(--green); font-size: 0.8rem; margin-top: 12px; padding: 8px 12px;
+  background: rgba(16,185,129,0.1); border-radius: 8px; display: none; text-align: center;
 }
 
-/* 名字字段在登录模式下隐藏 */
 .name-field.hidden { display: none; }
 </style>
 </head>
 <body>
 <div class="login-wrap">
-  <div class="logo">&#x1F4D6;</div>
+  <div class="logo">KC</div>
   <h1 id="modeTitle">登录</h1>
   <div class="sub" id="modeSub">使用邮箱登录 Kimis Channel</div>
 
