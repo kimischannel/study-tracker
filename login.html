@@ -63,7 +63,9 @@ body {
   color: var(--green); font-size: 0.85rem; margin-top: 12px; padding: 8px 12px;
   background: #f0fdf4; border-radius: 8px; display: none; text-align: center;
 }
-#extraFields { display: none; }
+
+/* 名字字段在登录模式下隐藏 */
+.name-field.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -77,11 +79,9 @@ body {
     <input type="tel" id="phone" placeholder="输入手机号" maxlength="11" autocomplete="tel">
   </div>
 
-  <div id="extraFields">
-    <div class="field">
-      <label>你的名字</label>
-      <input type="text" id="name" placeholder="输入你的名字" maxlength="20" autocomplete="name">
-    </div>
+  <div class="field name-field hidden" id="nameField">
+    <label>名字</label>
+    <input type="text" id="name" placeholder="输入你的名字" maxlength="20" autocomplete="name">
   </div>
 
   <div class="field">
@@ -96,182 +96,190 @@ body {
 </div>
 
 <script>
-const SUPABASE_URL = 'https://fdldkejfkvcymlzcmeub.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_0r9JoiUqOggGX7Cum1gjtQ_WEkBE2Sp';
+(function() {
+  var SUPABASE_URL = 'https://fdldkejfkvcymlzcmeub.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_0r9JoiUqOggGX7Cum1gjtQ_WEkBE2Sp';
+  var mode = 'login';
 
-let mode = 'login';
-const $ = id => document.getElementById(id);
+  var phoneEl = document.getElementById('phone');
+  var nameEl = document.getElementById('name');
+  var passwordEl = document.getElementById('password');
+  var nameFieldEl = document.getElementById('nameField');
+  var btnSubmit = document.getElementById('btnSubmit');
+  var btnToggle = document.getElementById('btnToggle');
+  var modeTitle = document.getElementById('modeTitle');
+  var modeSub = document.getElementById('modeSub');
+  var errorMsg = document.getElementById('errorMsg');
+  var successMsg = document.getElementById('successMsg');
 
-console.log('[login] page loaded, mode:', mode);
+  console.log('[login] page ready, mode:', mode);
 
-function getDeviceInfo() {
-  var ua = navigator.userAgent;
-  if (/iPhone/.test(ua)) return 'iOS | iPhone | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Safari');
-  if (/iPad/.test(ua)) return 'iPadOS | iPad | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Safari');
-  if (/Android/.test(ua)) {
-    var m = ua.match(/; ([^;)]+)(?=;|\))/);
-    return 'Android | ' + (m ? m[1].trim() : 'Phone') + ' | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Browser');
-  }
-  if (/Windows/.test(ua)) return 'Windows | PC | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Browser');
-  if (/Mac/.test(ua)) return 'macOS | Mac | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Safari');
-  return 'Unknown | Unknown | Unknown';
-}
-
-async function hashPassword(pwd) {
-  var data = new TextEncoder().encode(pwd);
-  var hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-}
-
-function showError(msg) {
-  console.error('[login]', msg);
-  $('errorMsg').textContent = msg;
-  $('errorMsg').style.display = '';
-  $('successMsg').style.display = 'none';
-}
-
-function showSuccess(msg) {
-  console.log('[login] success:', msg);
-  $('successMsg').textContent = msg;
-  $('successMsg').style.display = '';
-  $('errorMsg').style.display = 'none';
-}
-
-function setLoading(loading) {
-  var btn = $('btnSubmit');
-  btn.disabled = loading;
-  if (loading) {
-    btn.textContent = '请稍候...';
-  } else {
-    btn.textContent = mode === 'login' ? '登 录' : '注 册';
-  }
-}
-
-// Toggle mode
-$('btnToggle').addEventListener('click', function() {
-  mode = mode === 'login' ? 'register' : 'login';
-  console.log('[login] switched to mode:', mode);
-  $('modeTitle').textContent = mode === 'login' ? '登录' : '注册';
-  $('modeSub').textContent = mode === 'login' ? '使用手机号登录学习计时' : '创建账号开始记录学习';
-  $('btnSubmit').textContent = mode === 'login' ? '登 录' : '注 册';
-  $('btnToggle').textContent = mode === 'login' ? '还没有账号？点此注册' : '已有账号？点此登录';
-  $('extraFields').style.display = mode === 'register' ? 'block' : 'none';
-  $('errorMsg').style.display = 'none';
-  $('successMsg').style.display = 'none';
-});
-
-// Submit
-$('btnSubmit').addEventListener('click', async function() {
-  var phone = $('phone').value.trim();
-  var password = $('password').value;
-  var name = $('name').value.trim();
-
-  $('errorMsg').style.display = 'none';
-  $('successMsg').style.display = 'none';
-
-  if (!phone || phone.length < 11) { showError('请输入正确的手机号（11位）'); return; }
-  if (!password || password.length < 4) { showError('密码至少4位'); return; }
-  if (mode === 'register' && !name) { showError('请输入你的名字'); return; }
-
-  setLoading(true);
-  console.log('[login] submit started, mode:', mode, 'phone:', phone);
-
-  try {
-    if (mode === 'register') {
-      // Check if phone taken
-      console.log('[login] checking phone...');
-      var checkUrl = SUPABASE_URL + '/rest/v1/users?phone=eq.' + encodeURIComponent(phone) + '&select=id&limit=1';
-      var checkRes = await fetch(checkUrl, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-      });
-      console.log('[login] check status:', checkRes.status);
-
-      if (!checkRes.ok) {
-        var errText = await checkRes.text();
-        console.error('[login] check error:', errText);
-        throw new Error('网络错误，请检查连接');
-      }
-
-      var existing = await checkRes.json();
-      console.log('[login] existing:', existing.length);
-      if (existing.length > 0) { showError('该手机号已注册，请直接登录'); setLoading(false); return; }
-
-      // Register
-      var pHash = await hashPassword(password);
-      var deviceInfo = getDeviceInfo();
-      var body = JSON.stringify({ phone: phone, name: name, password_hash: pHash, device_info: deviceInfo });
-      console.log('[login] registering, body length:', body.length);
-
-      var regRes = await fetch(SUPABASE_URL + '/rest/v1/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Prefer': 'return=representation'
-        },
-        body: body
-      });
-      console.log('[login] register status:', regRes.status);
-
-      if (!regRes.ok) {
-        var regErr = await regRes.text();
-        console.error('[login] register error:', regErr);
-        throw new Error('注册失败（HTTP ' + regRes.status + '）');
-      }
-
-      var users = await regRes.json();
-      console.log('[login] register ok, user id:', users[0].id);
-      showSuccess('注册成功，正在跳转...');
-      sessionStorage.setItem('user', JSON.stringify(users[0]));
-      setTimeout(function() { location.href = 'index.html'; }, 500);
-    } else {
-      // Login
-      console.log('[login] logging in...');
-      var loginUrl = SUPABASE_URL + '/rest/v1/users?phone=eq.' + encodeURIComponent(phone) + '&select=*&limit=1';
-      var loginRes = await fetch(loginUrl, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-      });
-      console.log('[login] login status:', loginRes.status);
-
-      if (!loginRes.ok) {
-        var loginErr = await loginRes.text();
-        console.error('[login] login error:', loginErr);
-        throw new Error('网络错误，请检查连接');
-      }
-
-      var users = await loginRes.json();
-      console.log('[login] users found:', users.length);
-
-      if (users.length === 0) { showError('账号不存在，请先注册'); setLoading(false); return; }
-
-      var pHash = await hashPassword(password);
-      console.log('[login] hash comparison, expected:', users[0].password_hash.substring(0,10) + '...', 'got:', pHash.substring(0,10) + '...');
-
-      if (pHash !== users[0].password_hash) { showError('密码错误'); setLoading(false); return; }
-
-      console.log('[login] login ok');
-      showSuccess('登录成功，正在跳转...');
-      sessionStorage.setItem('user', JSON.stringify(users[0]));
-      setTimeout(function() { location.href = 'index.html'; }, 500);
+  function getDeviceInfo() {
+    var ua = navigator.userAgent;
+    if (/iPhone/.test(ua)) { return 'iOS | iPhone | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Safari'); }
+    if (/iPad/.test(ua)) { return 'iPadOS | iPad | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Safari'); }
+    if (/Android/.test(ua)) {
+      var m = ua.match(/; ([^;)]+)(?=;|\))/);
+      return 'Android | ' + (m ? m[1].trim() : 'Phone') + ' | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Browser');
     }
-  } catch (err) {
-    console.error('[login] exception:', err);
-    showError('操作失败：' + (err.message || '未知错误，请重试'));
-    setLoading(false);
+    if (/Windows/.test(ua)) { return 'Windows | PC | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Browser'); }
+    if (/Mac/.test(ua)) { return 'macOS | Mac | ' + (ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0] || 'Safari'); }
+    return 'Unknown | Unknown | Unknown';
   }
-});
 
-// Enter key
-$('password').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') $('btnSubmit').click();
-});
-$('phone').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') $('password').focus();
-});
-$('name').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') $('password').focus();
-});
+  async function hashPassword(pwd) {
+    var data = new TextEncoder().encode(pwd);
+    var hash = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hash)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+  }
+
+  function showError(msg) {
+    console.error('[login]', msg);
+    errorMsg.textContent = msg;
+    errorMsg.style.display = '';
+    successMsg.style.display = 'none';
+  }
+
+  function showSuccess(msg) {
+    console.log('[login]', msg);
+    successMsg.textContent = msg;
+    successMsg.style.display = '';
+    errorMsg.style.display = 'none';
+  }
+
+  function setLoading(loading) {
+    btnSubmit.disabled = loading;
+    btnSubmit.textContent = loading ? '请稍候...' : (mode === 'login' ? '登 录' : '注 册');
+  }
+
+  function setMode(newMode) {
+    mode = newMode;
+    console.log('[login] mode:', mode);
+    if (mode === 'register') {
+      modeTitle.textContent = '注册';
+      modeSub.textContent = '创建账号开始记录学习';
+      btnSubmit.textContent = '注 册';
+      btnToggle.textContent = '已有账号？点此登录';
+      nameFieldEl.classList.remove('hidden');
+    } else {
+      modeTitle.textContent = '登录';
+      modeSub.textContent = '使用手机号登录学习计时';
+      btnSubmit.textContent = '登 录';
+      btnToggle.textContent = '还没有账号？点此注册';
+      nameFieldEl.classList.add('hidden');
+    }
+    errorMsg.style.display = 'none';
+    successMsg.style.display = 'none';
+  }
+
+  // Toggle
+  btnToggle.addEventListener('click', function() {
+    setMode(mode === 'login' ? 'register' : 'login');
+  });
+
+  // Submit
+  btnSubmit.addEventListener('click', async function() {
+    var phone = phoneEl.value.trim();
+    var password = passwordEl.value;
+    var name = nameEl.value.trim();
+
+    errorMsg.style.display = 'none';
+    successMsg.style.display = 'none';
+
+    if (!phone || phone.length < 11) { showError('请输入正确的手机号（11位）'); return; }
+    if (mode === 'register' && !name) { showError('请输入你的名字'); return; }
+    if (!password || password.length < 4) { showError('密码至少4位'); return; }
+
+    setLoading(true);
+    console.log('[login] submit, mode:', mode, 'phone:', phone);
+
+    try {
+      if (mode === 'register') {
+        // Check if phone exists
+        var checkUrl = SUPABASE_URL + '/rest/v1/users?phone=eq.' + encodeURIComponent(phone) + '&select=id&limit=1';
+        var checkRes = await fetch(checkUrl, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } });
+        console.log('[login] check phone status:', checkRes.status);
+
+        if (!checkRes.ok) {
+          var checkErr = await checkRes.text();
+          console.error('[login] check error:', checkErr);
+          throw new Error('网络错误（' + checkRes.status + '）');
+        }
+
+        var existing = await checkRes.json();
+        if (existing.length > 0) { showError('该手机号已注册，请直接登录'); setLoading(false); return; }
+
+        // Register
+        var pHash = await hashPassword(password);
+        var deviceInfo = getDeviceInfo();
+        var body = JSON.stringify({ phone: phone, name: name, password_hash: pHash, device_info: deviceInfo });
+        console.log('[login] registering...');
+
+        var regRes = await fetch(SUPABASE_URL + '/rest/v1/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Prefer': 'return=representation'
+          },
+          body: body
+        });
+        console.log('[login] register status:', regRes.status);
+
+        if (!regRes.ok) {
+          var regErr = await regRes.text();
+          console.error('[login] register error:', regErr);
+          throw new Error('注册失败（' + regRes.status + '）');
+        }
+
+        var users = await regRes.json();
+        console.log('[login] registered, user:', users[0].id);
+        showSuccess('注册成功，正在跳转...');
+        sessionStorage.setItem('user', JSON.stringify(users[0]));
+        setTimeout(function() { location.href = 'index.html'; }, 500);
+
+      } else {
+        // Login
+        var loginUrl = SUPABASE_URL + '/rest/v1/users?phone=eq.' + encodeURIComponent(phone) + '&select=*&limit=1';
+        var loginRes = await fetch(loginUrl, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } });
+        console.log('[login] login status:', loginRes.status);
+
+        if (!loginRes.ok) {
+          var loginErr = await loginRes.text();
+          console.error('[login] login error:', loginErr);
+          throw new Error('网络错误（' + loginRes.status + '）');
+        }
+
+        var users = await loginRes.json();
+        if (users.length === 0) { showError('账号不存在，请先注册'); setLoading(false); return; }
+
+        var pHash = await hashPassword(password);
+        if (pHash !== users[0].password_hash) { showError('密码错误'); setLoading(false); return; }
+
+        console.log('[login] login ok');
+        showSuccess('登录成功，正在跳转...');
+        sessionStorage.setItem('user', JSON.stringify(users[0]));
+        setTimeout(function() { location.href = 'index.html'; }, 500);
+      }
+    } catch (err) {
+      console.error('[login] exception:', err);
+      showError('操作失败：' + (err.message || '未知错误'));
+      setLoading(false);
+    }
+  });
+
+  // Enter key
+  passwordEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') btnSubmit.click();
+  });
+  phoneEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') passwordEl.focus();
+  });
+  nameEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') passwordEl.focus();
+  });
+})();
 </script>
 </body>
 </html>
