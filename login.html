@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>登录 — 学习计时</title>
+<title>登录 — Kimis Channel</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -72,7 +72,7 @@ body {
 <div class="login-wrap">
   <div class="logo">&#x1F4D6;</div>
   <h1 id="modeTitle">登录</h1>
-  <div class="sub" id="modeSub">使用邮箱登录学习计时</div>
+  <div class="sub" id="modeSub">使用邮箱登录 Kimis Channel</div>
 
   <div class="field">
     <label>邮箱</label>
@@ -157,13 +157,13 @@ body {
     console.log('[login] mode:', mode);
     if (mode === 'register') {
       modeTitle.textContent = '注册';
-      modeSub.textContent = '创建账号开始记录学习';
+      modeSub.textContent = '创建账号加入 Kimis Channel';
       btnSubmit.textContent = '注 册';
       btnToggle.textContent = '已有账号？点此登录';
       nameFieldEl.classList.remove('hidden');
     } else {
       modeTitle.textContent = '登录';
-      modeSub.textContent = '使用邮箱登录学习计时';
+      modeSub.textContent = '使用邮箱登录 Kimis Channel';
       btnSubmit.textContent = '登 录';
       btnToggle.textContent = '还没有账号？点此注册';
       nameFieldEl.classList.add('hidden');

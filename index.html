@@ -2,243 +2,209 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>学习时间记录</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Kimis Channel</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --c-green: #059669;
-  --c-green-hover: #047857;
-  --c-green-light: #ecfdf5;
-  --c-green-glow: rgba(5,150,105,0.15);
-  --c-red: #ef4444;
-  --c-amber: #f59e0b;
-  --c-bg: #f8fafc;
-  --c-card: #ffffff;
-  --c-text: #0f172a;
-  --c-muted: #64748b;
-  --c-border: #e2e8f0;
-  --c-border-light: #f1f5f9;
-  --radius-lg: 20px;
-  --radius-md: 14px;
-  --radius-sm: 10px;
-  --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
-  --shadow-btn: 0 2px 8px rgba(5,150,105,0.25);
-  --shadow-btn-hover: 0 4px 16px rgba(5,150,105,0.35);
+  --green: #059669; --green-hover: #047857; --green-light: #ecfdf5;
+  --green-glow: rgba(5,150,105,0.15); --red: #ef4444; --amber: #f59e0b;
+  --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b;
+  --border: #e2e8f0; --border-light: #f1f5f9;
+  --radius-lg: 20px; --radius-md: 14px; --radius-sm: 10px;
+  --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+  --nav-height: 68px;
 }
 html { font-size: 16px; }
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-  background: var(--c-bg);
-  color: var(--c-text);
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
-  display: flex; justify-content: center;
-  padding: 40px 16px 80px;
+  padding-bottom: var(--nav-height);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.01em;
-  background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, #d1fae5 0%, transparent 60%),
+  background-image: radial-gradient(ellipse 80% 50% at 50% -20%, #d1fae5 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 80% 80%, #ecfdf5 0%, transparent 50%);
   background-attachment: fixed;
 }
-.app { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 18px; }
+.app { max-width: 500px; margin: 0 auto; padding: 20px 16px 0; }
 
-/* ── Card ── */
-.card {
-  background: var(--c-card);
-  border-radius: var(--radius-lg);
-  padding: 26px 24px;
-  box-shadow: var(--shadow-card);
-  border: 1px solid var(--c-border-light);
-  transition: box-shadow 0.3s, transform 0.3s;
-}
-.card-glass {
-  background: rgba(255,255,255,0.8);
-  backdrop-filter: blur(20px);
+/* Header */
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.header-left { display: flex; align-items: center; gap: 10px; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; color: #fff; flex-shrink: 0; }
+.header-title { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; }
+.header-date { font-size: 0.75rem; color: var(--muted); }
+
+/* Bottom Nav */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 500px; height: var(--nav-height);
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-light);
+  display: flex; align-items: center; justify-content: space-around;
+  z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 0.7rem; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: color 0.2s; padding: 6px 12px; border-radius: 10px;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+.nav-item .nav-icon { font-size: 1.3rem; transition: transform 0.2s; }
+.nav-item.active { color: var(--green); }
+.nav-item.active .nav-icon { transform: scale(1.1); }
+.nav-item:active { background: #f1f5f9; }
+
+/* Panels */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* Card */
+.card {
+  background: var(--card); border-radius: var(--radius-lg);
+  padding: 22px 20px; box-shadow: var(--shadow);
+  border: 1px solid var(--border-light); margin-bottom: 14px;
 }
 
-/* ── Header ── */
-.header { text-align: center; padding: 4px 0 0; }
-.header h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; }
-.header .sub { font-size: 0.8rem; color: var(--c-muted); font-weight: 500; margin-top: 2px; }
-
-/* ── Timer Card ── */
-.timer-card { text-align: center; padding: 30px 24px 28px; }
-.timer-ring-wrap { position: relative; display: inline-block; margin: 6px 0 22px; }
+/* Timer */
+.timer-ring-wrap { position: relative; display: inline-block; margin: 8px 0 18px; }
 .timer-ring { transform: rotate(-90deg); }
-.timer-ring-bg { fill: none; stroke: var(--c-border); stroke-width: 5; }
-.timer-ring-fg {
-  fill: none; stroke: var(--c-green); stroke-width: 5; stroke-linecap: round;
-  transition: stroke-dashoffset 0.4s ease;
-  filter: drop-shadow(0 0 6px rgba(5,150,105,0.3));
-}
+.timer-ring-bg { fill: none; stroke: var(--border); stroke-width: 5; }
+.timer-ring-fg { fill: none; stroke: var(--green); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.4s ease; filter: drop-shadow(0 0 6px rgba(5,150,105,0.3)); }
 .timer-ring-fg.active { filter: drop-shadow(0 0 10px rgba(5,150,105,0.5)); }
 .timer-display {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  font-size: 2.8rem; font-weight: 800; font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em; color: var(--c-text); line-height: 1;
+  font-size: 2.4rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
 }
-.timer-display.active { color: var(--c-green); }
-.timer-pulse {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 100%; height: 100%; border-radius: 50%;
-  animation: pulse-ring 2s ease-out infinite;
-  pointer-events: none; opacity: 0;
-}
-@keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(5,150,105,0.4); opacity: 1; }
-  100% { box-shadow: 0 0 0 40px rgba(5,150,105,0); opacity: 0; }
-}
+.timer-display.active { color: var(--green); }
+.timer-center { text-align: center; }
 
-.subject-wrap { position: relative; margin-bottom: 20px; }
-.subject-icon {
-  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-  font-size: 1rem; pointer-events: none; opacity: 0.5;
-}
 .subject-input {
-  width: 100%; border: 1.5px solid var(--c-border); border-radius: var(--radius-sm);
-  padding: 13px 14px 13px 38px; font-size: 0.95rem; outline: none;
-  transition: all 0.25s; background: #fafbfc; font-weight: 500;
+  width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 14px; font-size: 0.9rem; outline: none; transition: all 0.25s;
+  background: #fafbfc; font-weight: 500; margin-bottom: 12px;
 }
-.subject-input:focus {
-  border-color: var(--c-green); background: #fff;
-  box-shadow: 0 0 0 4px var(--c-green-glow);
-}
-.subject-input::placeholder { color: #cbd5e1; font-weight: 400; }
+.subject-input:focus { border-color: var(--green); background: #fff; box-shadow: 0 0 0 4px var(--green-glow); }
+.subject-input::placeholder { color: #cbd5e1; }
 
-.btn-row { display: flex; gap: 10px; justify-content: center; }
+.btn-row { display: flex; gap: 8px; justify-content: center; }
 .btn {
-  display: inline-flex; align-items: center; gap: 6px; padding: 12px 24px;
-  border-radius: 28px; font-size: 0.95rem; font-weight: 700; border: none;
-  cursor: pointer; transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
-  letter-spacing: -0.01em; user-select: none;
+  display: inline-flex; align-items: center; gap: 5px; padding: 11px 22px;
+  border-radius: 24px; font-size: 0.9rem; font-weight: 700; border: none;
+  cursor: pointer; transition: all 0.2s; user-select: none; -webkit-tap-highlight-color: transparent;
 }
 .btn:active:not(:disabled) { transform: scale(0.95); }
-.btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.btn-primary {
-  background: var(--c-green); color: #fff; box-shadow: var(--shadow-btn);
-}
-.btn-primary:hover:not(:disabled) { background: var(--c-green-hover); box-shadow: var(--shadow-btn-hover); transform: translateY(-1px); }
-.btn-amber { background: var(--c-amber); color: #fff; box-shadow: 0 2px 8px rgba(245,158,11,0.25); }
-.btn-amber:hover { background: #d97706; }
-.btn-outline {
-  background: #fff; color: var(--c-red); border: 1.5px solid var(--c-red);
-}
-.btn-outline:hover:not(:disabled) { background: #fef2f2; }
-.btn-ghost { background: #f1f5f9; color: var(--c-muted); }
-.btn-ghost:hover { background: #e2e8f0; color: var(--c-text); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-green { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.25); }
+.btn-green:hover:not(:disabled) { background: var(--green-hover); }
+.btn-amber { background: var(--amber); color: #fff; }
+.btn-red { background: #fff; color: var(--red); border: 1.5px solid var(--red); }
+.btn-ghost { background: #f1f5f9; color: var(--muted); }
+.btn-ghost:hover { background: #e2e8f0; color: var(--text); }
 
-/* ── Compact cards ── */
-.compact-row { display: flex; gap: 14px; }
-.compact-card { flex: 1; padding: 18px 16px; }
+/* Progress bar */
+.progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.progress-label { font-size: 0.8rem; font-weight: 700; width: 36px; flex-shrink: 0; }
+.progress-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+.progress-fill.green { background: linear-gradient(90deg, #059669, #10b981); }
+.progress-fill.blue { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+.progress-fill.amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.progress-val { font-size: 0.8rem; font-weight: 700; width: 60px; text-align: right; color: var(--muted); white-space: nowrap; }
 
-/* ── Progress ── */
-.progress-label-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-.progress-label { font-size: 0.75rem; font-weight: 700; color: var(--c-muted); text-transform: uppercase; letter-spacing: 0.08em; }
-.progress-value { font-size: 0.8rem; color: var(--c-muted); font-weight: 600; font-variant-numeric: tabular-nums; }
-.progress-track { height: 10px; background: var(--c-border); border-radius: 5px; overflow: hidden; }
-.progress-fill {
-  height: 100%; border-radius: 5px;
-  background: linear-gradient(90deg, #059669, #10b981);
-  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
-  position: relative;
-}
-.progress-fill.done { background: linear-gradient(90deg, #059669, #34d399); }
-.progress-fill::after {
-  content: ''; position: absolute; right: 0; top: 0; width: 10px; height: 100%;
-  background: #fff; border-radius: 50%; opacity: 0.6;
-}
+/* 888 Card */
+.triple-progress { margin-bottom: 16px; }
+.triple-header { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
 
-/* ── Goal ── */
-.goal-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.goal-label { font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-.goal-inputs { display: flex; align-items: center; gap: 3px; font-size: 0.85rem; color: var(--c-muted); font-weight: 500; }
-.goal-input {
-  width: 48px; border: 1.5px solid var(--c-border); border-radius: 8px;
-  padding: 7px 4px; font-size: 0.85rem; text-align: center; outline: none;
-  font-weight: 700; transition: all 0.2s; background: #fafbfc;
+.input-row { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
+.input-row label { font-size: 0.8rem; font-weight: 600; white-space: nowrap; color: var(--muted); }
+.num-input {
+  width: 56px; border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 8px 4px; font-size: 0.9rem; text-align: center; font-weight: 700;
+  outline: none; background: #fafbfc; transition: all 0.2s;
 }
-.goal-input:focus { border-color: var(--c-green); box-shadow: 0 0 0 3px var(--c-green-glow); background: #fff; }
-.btn-save {
-  font-size: 0.8rem; font-weight: 700; padding: 8px 18px;
-  background: var(--c-green); color: #fff; border: none; border-radius: 20px;
-  cursor: pointer; transition: all 0.2s; letter-spacing: -0.01em;
-}
-.btn-save:hover { background: var(--c-green-hover); }
-.btn-save:active { transform: scale(0.95); }
+.num-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow); background: #fff; }
+.unit { font-size: 0.8rem; color: var(--muted); }
 
-/* ── Tabs ── */
-.tab-bar { display: flex; gap: 4px; background: #f1f5f9; border-radius: 14px; padding: 4px; margin-bottom: 22px; }
-.tab {
-  flex: 1; text-align: center; padding: 10px; font-size: 0.85rem; font-weight: 700;
-  color: var(--c-muted); cursor: pointer; border-radius: 11px; transition: all 0.2s;
-  letter-spacing: -0.01em;
+.btn-sm {
+  padding: 8px 16px; font-size: 0.8rem; font-weight: 700; border-radius: 18px;
+  border: none; cursor: pointer; transition: all 0.2s;
+  background: var(--green); color: #fff; -webkit-tap-highlight-color: transparent;
 }
-.tab.active { background: #fff; color: var(--c-text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.btn-sm:active { transform: scale(0.95); }
+.btn-sm:hover { background: var(--green-hover); }
 
-/* ── History ── */
-.day-group { margin-bottom: 22px; }
-.day-head {
-  font-size: 0.8rem; font-weight: 700; color: var(--c-muted); margin-bottom: 10px;
-  display: flex; align-items: center; gap: 10px;
+/* Diary */
+.diary-date { font-size: 0.85rem; font-weight: 700; color: var(--muted); margin-bottom: 12px; }
+.diary-textarea {
+  width: 100%; min-height: 120px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px; font-size: 0.9rem;
+  outline: none; resize: vertical; font-family: inherit; background: #fafbfc;
+  transition: all 0.2s;
 }
-.day-head::after { content: ''; flex: 1; height: 1px; background: var(--c-border); }
-.day-head.today { color: var(--c-green); }
-.session-row {
-  display: flex; align-items: center; gap: 14px; padding: 12px;
-  border-radius: var(--radius-sm); margin-bottom: 2px; transition: background 0.15s;
+.diary-textarea:focus { border-color: var(--green); box-shadow: 0 0 0 4px var(--green-glow); background: #fff; }
+.diary-list { margin-top: 16px; }
+.diary-item {
+  padding: 14px; border-radius: var(--radius-sm); margin-bottom: 8px;
+  background: var(--bg); border: 1px solid var(--border-light);
 }
-.session-row:hover { background: #f8fafc; }
-.dot {
-  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
-}
-.session-meta { flex: 1; min-width: 0; }
-.session-name { font-size: 0.9rem; font-weight: 700; }
-.session-range { font-size: 0.75rem; color: var(--c-muted); margin-top: 1px; }
-.session-dur { font-size: 0.9rem; font-weight: 800; color: var(--c-green); white-space: nowrap; }
-.btn-del {
+.diary-item-date { font-size: 0.75rem; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+.diary-item-text { font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; }
+.diary-item-del {
   background: none; border: none; color: #cbd5e1; cursor: pointer;
-  font-size: 1.2rem; padding: 4px 8px; border-radius: 8px; transition: all 0.15s;
-  line-height: 1; font-weight: 300;
+  font-size: 1.1rem; float: right; padding: 2px 6px; border-radius: 6px;
 }
-.btn-del:hover { color: var(--c-red); background: #fef2f2; }
-.empty-state { text-align: center; color: var(--c-muted); padding: 48px 0; }
-.empty-icon { font-size: 2.8rem; margin-bottom: 12px; opacity: 0.7; }
-.empty-text { font-size: 0.9rem; font-weight: 500; }
+.diary-item-del:hover { color: var(--red); background: #fef2f2; }
 
-/* ── Stats ── */
-.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 26px; }
-.stat-item {
-  text-align: center; background: var(--c-green-light); border-radius: var(--radius-md);
-  padding: 20px 8px; transition: transform 0.2s;
+/* Sleep */
+.sleep-card { text-align: center; }
+.sleep-row { display: flex; gap: 12px; justify-content: center; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.sleep-field { text-align: left; }
+.sleep-field label { font-size: 0.75rem; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.sleep-field input {
+  width: 130px; border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 10px 12px; font-size: 0.95rem; outline: none; background: #fafbfc; font-weight: 600;
 }
-.stat-item:hover { transform: translateY(-2px); }
-.stat-icon { font-size: 1.3rem; margin-bottom: 6px; }
-.stat-num { font-size: 1.3rem; font-weight: 800; color: var(--c-green); letter-spacing: -0.02em; }
-.stat-hint { font-size: 0.7rem; color: var(--c-muted); margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-.chart-label { font-size: 0.75rem; font-weight: 700; color: var(--c-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
-.chart-box { width: 100%; }
-.chart-box canvas { width: 100%; border-radius: 8px; }
+.sleep-field input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow); background: #fff; }
+.sleep-result { font-size: 1rem; font-weight: 700; color: var(--green); margin-bottom: 12px; }
+.sleep-badge { display: inline-block; padding: 4px 14px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; }
+.sleep-badge.good { background: var(--green-light); color: var(--green); }
+.sleep-badge.warn { background: #fef3c7; color: #d97706; }
+.sleep-badge.bad { background: #fef2f2; color: var(--red); }
 
-/* ── Toast ── */
+/* Daily Summary */
+.summary-grid { display: flex; gap: 10px; margin-bottom: 16px; }
+.summary-item {
+  flex: 1; text-align: center; background: var(--green-light); border-radius: var(--radius-md);
+  padding: 16px 8px;
+}
+.summary-icon { font-size: 1.2rem; margin-bottom: 4px; }
+.summary-num { font-size: 1.1rem; font-weight: 800; color: var(--green); }
+.summary-label { font-size: 0.68rem; color: var(--muted); margin-top: 2px; font-weight: 600; }
+
+/* Toast */
 .toast {
-  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(120px);
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(120px);
   background: #0f172a; color: #fff; padding: 12px 28px; border-radius: 28px;
   font-size: 0.85rem; font-weight: 600; opacity: 0; transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
-  pointer-events: none; z-index: 100; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  pointer-events: none; z-index: 200; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-@media (max-width: 480px) {
-  body { padding: 20px 10px 60px; }
-  .app { gap: 14px; }
-  .card { padding: 20px 16px; }
-  .timer-display { font-size: 2.4rem; }
-  .compact-row { flex-direction: column; gap: 14px; }
-  .btn { padding: 10px 18px; font-size: 0.85rem; }
+.empty { text-align: center; color: var(--muted); padding: 32px 0; font-size: 0.85rem; }
+
+/* Profile */
+.profile-section { margin-bottom: 20px; }
+.profile-email { font-size: 0.85rem; color: var(--muted); }
+.profile-stat { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-light); font-size: 0.9rem; }
+
+@media (max-width: 400px) {
+  .app { padding: 14px 10px 0; }
+  .card { padding: 16px 14px; }
+  .timer-display { font-size: 2rem; }
+  .btn { padding: 10px 16px; font-size: 0.8rem; }
 }
 </style>
 </head>
@@ -246,359 +212,514 @@ body {
 <div class="app">
   <!-- Header -->
   <div class="header">
-    <div style="display:flex;align-items:center;justify-content:center;gap:12px">
-      <div id="userAvatar" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;color:#fff;flex-shrink:0"></div>
-      <h1 style="margin:0">学习计时</h1>
+    <div class="header-left">
+      <div class="avatar" id="userAvatar"></div>
+      <div>
+        <div class="header-title">Kimis Channel</div>
+        <div class="header-date" id="headerDate"></div>
+      </div>
     </div>
-    <div class="sub"><span id="userName"></span> · <a href="#" id="btnLogout" style="color:var(--c-muted);text-decoration:none;font-size:0.75rem">退出</a></div>
+    <div id="daySummary" style="font-size:0.8rem;font-weight:700;color:var(--green)"></div>
   </div>
 
-  <!-- Timer -->
-  <div class="card card-glass timer-card">
-    <div class="subject-wrap">
-      <span class="subject-icon">📖</span>
+  <!-- ===== Timer Panel ===== -->
+  <div class="panel active" id="panelTimer">
+    <div class="card timer-center">
       <input class="subject-input" id="subject" placeholder="科目名称，如：数学、编程、英语…" autocomplete="off">
+      <div class="timer-ring-wrap">
+        <svg class="timer-ring" width="190" height="190" viewBox="0 0 210 210">
+          <circle class="timer-ring-bg" cx="105" cy="105" r="96"/>
+          <circle class="timer-ring-fg" id="timerRing" cx="105" cy="105" r="96"
+            stroke-dasharray="603" stroke-dashoffset="603"/>
+        </svg>
+        <div class="timer-display" id="timerDisplay">00:00:00</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-green" id="btnStart">▶ 开卷</button>
+        <button class="btn btn-amber" id="btnPause" style="display:none">⏸ 暂停</button>
+        <button class="btn btn-red" id="btnStop" disabled>⏹ 结束</button>
+        <button class="btn btn-ghost" id="btnReset">↻</button>
+      </div>
     </div>
-    <div class="timer-ring-wrap">
-      <svg class="timer-ring" width="210" height="210" viewBox="0 0 210 210">
-        <circle class="timer-ring-bg" cx="105" cy="105" r="96"/>
-        <circle class="timer-ring-fg" id="timerRing" cx="105" cy="105" r="96"
-          stroke-dasharray="603" stroke-dashoffset="603"/>
-      </svg>
-      <div class="timer-pulse" id="timerPulse"></div>
-      <div class="timer-display" id="timerDisplay">00:00:00</div>
+
+    <!-- Today progress -->
+    <div class="card">
+      <div class="progress-row">
+        <span class="progress-label" style="width:auto;flex:1">📖 今日学习</span>
+        <span class="progress-val" id="todayStudy">0h 0m</span>
+        <span style="font-size:0.75rem;color:var(--muted)">/ 目标 8h</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill green" id="studyBar" style="width:0%"></div></div>
     </div>
-    <div class="btn-row">
-      <button class="btn btn-primary" id="btnStart">▶ 开卷</button>
-      <button class="btn btn-amber" id="btnPause" style="display:none">⏸ 暂停</button>
-      <button class="btn btn-outline" id="btnStop" disabled>⏹ 停止</button>
-      <button class="btn btn-ghost" id="btnReset">↻ 重置</button>
+
+    <!-- Recent sessions -->
+    <div class="card" id="recentSessions" style="max-height:260px;overflow-y:auto">
+      <div style="font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">📋 近期记录</div>
+      <div id="recentList"></div>
     </div>
   </div>
 
-  <!-- Progress + Goal -->
-  <div class="compact-row">
-    <div class="card compact-card" style="flex:1.2">
-      <div class="progress-label-row">
-        <span class="progress-label">今日进度</span>
-        <span class="progress-value" id="progressText">0h 0m / 2h 0m</span>
+  <!-- ===== 888 Panel ===== -->
+  <div class="panel" id="panel888">
+    <div class="card">
+      <div class="triple-header">📊 今日 888 计划</div>
+      <div class="triple-progress">
+        <div class="progress-row">
+          <span class="progress-label">😴</span>
+          <div class="progress-track"><div class="progress-fill blue" id="barSleep" style="width:0%"></div></div>
+          <span class="progress-val" id="valSleep">0h / 8h</span>
+        </div>
+        <div class="progress-row">
+          <span class="progress-label">📖</span>
+          <div class="progress-track"><div class="progress-fill green" id="barStudy888" style="width:0%"></div></div>
+          <span class="progress-val" id="valStudy888">0h / 8h</span>
+        </div>
+        <div class="progress-row">
+          <span class="progress-label">🎮</span>
+          <div class="progress-track"><div class="progress-fill amber" id="barLeisure" style="width:0%"></div></div>
+          <span class="progress-val" id="valLeisure">0h / 8h</span>
+        </div>
       </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progressBar" style="width:0%"></div>
+
+      <!-- Sleep input -->
+      <div style="border-top:1px solid var(--border-light);padding-top:14px;margin-bottom:14px">
+        <div style="font-size:0.8rem;font-weight:700;color:var(--muted);margin-bottom:10px">😴 填写睡眠时间</div>
+        <div class="input-row">
+          <label>入睡</label>
+          <input class="num-input" id="sleepStart" type="time" value="23:00">
+          <label style="margin-left:8px">起床</label>
+          <input class="num-input" id="sleepEnd" type="time" value="07:00">
+        </div>
+        <div class="sleep-result" id="sleepCalc" style="margin-top:8px"></div>
+        <button class="btn-sm" id="btnSaveSleep">保存睡眠</button>
+      </div>
+
+      <!-- Leisure input -->
+      <div style="border-top:1px solid var(--border-light);padding-top:14px;margin-bottom:14px">
+        <div style="font-size:0.8rem;font-weight:700;color:var(--muted);margin-bottom:10px">🎮 填写休闲时间（含健身/游泳）</div>
+        <div class="input-row">
+          <input class="num-input" id="leisureHours" type="number" min="0" max="24" value="0" style="width:60px">
+          <label>小时</label>
+          <input class="num-input" id="leisureMinutes" type="number" min="0" max="59" value="0" style="width:60px">
+          <label>分钟</label>
+        </div>
+        <button class="btn-sm" id="btnSaveLeisure" style="margin-top:8px">保存休闲</button>
       </div>
     </div>
-    <div class="card compact-card goal-row" style="flex:0.8;justify-content:center">
-      <span class="goal-label">🎯 目标</span>
-      <div class="goal-inputs">
-        <input class="goal-input" id="goalHours" type="number" min="0" max="24" value="2">h
-        <input class="goal-input" id="goalMinutes" type="number" min="0" max="59" value="0">m
+
+    <!-- Daily summary -->
+    <div class="card">
+      <div class="triple-header">📅 今日完成情况</div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-icon">😴</div>
+          <div class="summary-num" id="sumSleep">0h</div>
+          <div class="summary-label">睡眠</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-icon">📖</div>
+          <div class="summary-num" id="sumStudy">0h</div>
+          <div class="summary-label">学习</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-icon">🎮</div>
+          <div class="summary-num" id="sumLeisure">0h</div>
+          <div class="summary-label">休闲</div>
+        </div>
       </div>
-      <button class="btn-save" id="btnSaveGoal">保存</button>
+      <div style="text-align:center;font-size:0.85rem;font-weight:700;color:var(--muted)" id="summaryMsg">今天也要加油哦 💪</div>
     </div>
   </div>
 
-  <!-- Tabs + Content -->
-  <div class="card">
-    <div class="tab-bar">
-      <div class="tab active" data-tab="history">📋 记录</div>
-      <div class="tab" data-tab="stats">📊 统计</div>
+  <!-- ===== Diary Panel ===== -->
+  <div class="panel" id="panelDiary">
+    <div class="card">
+      <div class="diary-date" id="diaryDate"></div>
+      <textarea class="diary-textarea" id="diaryText" placeholder="写点什么……"></textarea>
+      <div style="margin-top:10px;text-align:right">
+        <button class="btn-sm" id="btnSaveDiary">保存日记</button>
+      </div>
     </div>
-    <div id="historyPanel"></div>
-    <div id="statsPanel" style="display:none">
-      <div class="stat-grid">
-        <div class="stat-item">
-          <div class="stat-icon">☀️</div>
-          <div class="stat-num" id="statToday">0h 0m</div>
-          <div class="stat-hint">今日</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-icon">📅</div>
-          <div class="stat-num" id="statWeek">0h 0m</div>
-          <div class="stat-hint">本周</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-icon">📆</div>
-          <div class="stat-num" id="statMonth">0h 0m</div>
-          <div class="stat-hint">本月</div>
+    <div id="diaryList"></div>
+  </div>
+
+  <!-- ===== Profile Panel ===== -->
+  <div class="panel" id="panelProfile">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div class="avatar" id="profileAvatar" style="width:48px;height:48px;font-size:1.3rem"></div>
+        <div>
+          <div style="font-weight:800;font-size:1.1rem" id="profileName"></div>
+          <div class="profile-email" id="profileEmail"></div>
         </div>
       </div>
-      <div class="chart-label">近 7 天学习时长</div>
-      <div class="chart-box"><canvas id="chartCanvas"></canvas></div>
+      <div class="profile-section">
+        <div class="profile-stat"><span>累计学习</span><span style="font-weight:700" id="statTotalStudy">-</span></div>
+        <div class="profile-stat"><span>累计学习次数</span><span style="font-weight:700" id="statTotalSessions">-</span></div>
+        <div class="profile-stat"><span>日记篇数</span><span style="font-weight:700" id="statTotalDiary">-</span></div>
+        <div class="profile-stat"><span>888 达标天数</span><span style="font-weight:700" id="stat888Days">-</span></div>
+      </div>
+      <button class="btn btn-ghost" id="btnLogout" style="width:100%;margin-top:8px">退出登录</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <div class="nav-item active" data-tab="timer">
+    <span class="nav-icon">⏱️</span>计时
+  </div>
+  <div class="nav-item" data-tab="888">
+    <span class="nav-icon">📊</span>888
+  </div>
+  <div class="nav-item" data-tab="diary">
+    <span class="nav-icon">📝</span>日记
+  </div>
+  <div class="nav-item" data-tab="profile">
+    <span class="nav-icon">👤</span>我的
+  </div>
+</nav>
+
 <script>
-// ── Auth check ──
+// ── Auth ──
 const currentUser = JSON.parse(sessionStorage.getItem('user'));
 if (!currentUser) { location.href = 'login.html'; }
 
-// ── User display ──
-const AVATAR_COLORS = ['#059669','#3b82f6','#8b5cf6','#e11d48','#ea580c','#0891b2','#7c3aed','#be185d'];
-function initUser() {
-  const name = currentUser.name || '?';
-  const initial = name.charAt(0);
-  const color = AVATAR_COLORS[Math.abs([...name].reduce((h,c)=>((h<<5)-h)+c.charCodeAt(0),0)) % AVATAR_COLORS.length];
-  const av = document.getElementById('userAvatar');
-  av.style.background = color;
-  av.textContent = initial;
-  document.getElementById('userName').textContent = name;
-}
-initUser();
-document.getElementById('btnLogout').addEventListener('click', e => { e.preventDefault(); sessionStorage.clear(); location.href = 'login.html'; });
-
-// ── Data layer ──
-const STORAGE_KEY = 'study-tracker-data';
+// ── Data ──
+const STORAGE_KEY = 'kimis-channel-data';
 const RING_CIRCUMFERENCE = 2 * Math.PI * 96;
 
 function load() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) return JSON.parse(raw);
-  return { sessions: [], dailyGoal: 7200 };
+  return { sessions: [], diary: [], sleepLog: [], leisureLog: [] };
 }
 function save(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
-// ── Toast ──
+// ── Helpers ──
+const AVATAR_COLORS = ['#059669','#3b82f6','#8b5cf6','#e11d48','#ea580c','#0891b2','#7c3aed','#be185d'];
+function avatarColor(name) {
+  let h = 0; for (let i = 0; i < name.length; i++) h = ((h << 5) - h) + name.charCodeAt(i);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+function fmtShort(ms) {
+  const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return h > 0 ? h + 'h ' + m + 'm' : m + 'm';
+}
+function fmtFull(ms) {
+  const s = Math.floor(ms / 1000);
+  return String(Math.floor(s/3600)).padStart(2,'0') + ':' + String(Math.floor((s%3600)/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+}
+const todayStr = () => new Date().toISOString().slice(0, 10);
+
 let toastTimer;
-function showToast(msg) {
+function toast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
 }
 
+// ── User init ──
+function initUser() {
+  const name = currentUser.name || '?';
+  const color = avatarColor(name);
+  document.querySelectorAll('#userAvatar, #profileAvatar').forEach(el => {
+    el.style.background = color;
+    el.textContent = name.charAt(0);
+  });
+  document.getElementById('profileName').textContent = name;
+  document.getElementById('profileEmail').textContent = currentUser.email || '';
+  document.getElementById('headerDate').textContent = new Date().toLocaleDateString('zh-CN', { month:'long', day:'numeric', weekday:'short' });
+}
+initUser();
+
+// ── Tab navigation ──
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+    item.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel' + item.dataset.tab.charAt(0).toUpperCase() + item.dataset.tab.slice(1)).classList.add('active');
+    if (item.dataset.tab === 'profile') refreshProfile();
+    if (item.dataset.tab === '888') refresh888();
+  });
+});
+
 // ── Timer ──
 let timerInterval = null, pausedMs = 0, phaseStart = null;
 
 function getMs() { return phaseStart ? pausedMs + (Date.now() - phaseStart) : pausedMs; }
-
-function fmtFull(ms) {
-  const s = Math.floor(ms / 1000);
-  return `${String(Math.floor(s/3600)).padStart(2,'0')}:${String(Math.floor((s%3600)/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+function tick() {
+  document.getElementById('timerDisplay').textContent = fmtFull(getMs());
+  updateRing(getMs());
 }
-function fmtShort(ms) {
-  const s = Math.floor(ms / 1000);
-  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60);
-  return h > 0 ? `${h}h ${m}m` : `${m}m`;
-}
-
-function tick() { document.getElementById('timerDisplay').textContent = fmtFull(getMs()); updateRing(getMs()); }
-
 function updateRing(ms) {
-  const goal = load().dailyGoal * 1000;
+  const goal = 8 * 3600 * 1000;
   const pct = goal > 0 ? Math.min(ms / goal, 1) : 0;
   document.getElementById('timerRing').style.strokeDashoffset = RING_CIRCUMFERENCE * (1 - pct);
 }
-
-function setUI(running) {
-  const disp = document.getElementById('timerDisplay');
-  const ring = document.getElementById('timerRing');
-  const pulse = document.getElementById('timerPulse');
-  const btnS = document.getElementById('btnStart'), btnP = document.getElementById('btnPause');
-  const btnSt = document.getElementById('btnStop'), btnR = document.getElementById('btnReset');
-  disp.classList.toggle('active', running);
-  ring.classList.toggle('active', running);
-  pulse.style.display = running ? '' : 'none';
-  btnS.style.display = running ? 'none' : '';
-  btnP.style.display = running ? '' : 'none';
-  btnSt.disabled = !running;
-  btnR.disabled = running;
+function setTimerUI(running) {
+  const d = document.getElementById('timerDisplay'), r = document.getElementById('timerRing');
+  d.classList.toggle('active', running); r.classList.toggle('active', running);
+  document.getElementById('btnStart').style.display = running ? 'none' : '';
+  document.getElementById('btnPause').style.display = running ? '' : 'none';
+  document.getElementById('btnStop').disabled = !running;
+  document.getElementById('btnReset').disabled = running;
 }
-
 function start() {
-  phaseStart = Date.now();
-  timerInterval = setInterval(tick, 200);
-  setUI(true);
+  phaseStart = Date.now(); timerInterval = setInterval(tick, 200); setTimerUI(true);
 }
 function pause() {
   if (phaseStart) { pausedMs += Date.now() - phaseStart; phaseStart = null; }
-  clearInterval(timerInterval); timerInterval = null;
-  tick(); setUI(false);
+  clearInterval(timerInterval); timerInterval = null; tick(); setTimerUI(false);
 }
 function stop() {
   if (!phaseStart && pausedMs === 0) return;
   const ms = getMs();
   clearInterval(timerInterval); timerInterval = null;
   const data = load(), now = new Date();
-  const session = {
-    id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-    subject: document.getElementById('subject').value.trim()||'未命名',
+  data.sessions.push({
+    id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    subject: document.getElementById('subject').value.trim() || '未命名',
     startTime: new Date(now - ms).toISOString(),
     endTime: now.toISOString(),
     duration: Math.round(ms / 1000),
     user_id: currentUser.id,
     user_name: currentUser.name
-  };
-  data.sessions.push(session);
-  save(data);
-  saveRemoteSession(session);
-  pausedMs = 0; phaseStart = null; tick(); setUI(false); refreshAll();
-  showToast('✅ 学习记录已保存');
-}
-function reset() { clearInterval(timerInterval); timerInterval = null; pausedMs = 0; phaseStart = null; tick(); setUI(false); }
-
-// ── Subject colors ──
-const SUBJECT_COLORS = ['#059669','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899'];
-const colorCache = {};
-function getColor(s) {
-  if (!colorCache[s]) { let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h)+s.charCodeAt(i);colorCache[s]=SUBJECT_COLORS[Math.abs(h)%SUBJECT_COLORS.length]; }
-  return colorCache[s];
-}
-
-// ── Progress ──
-function updateProgress() {
-  const data = load(), goal = data.dailyGoal;
-  const today = new Date().toISOString().slice(0,10);
-  const sec = data.sessions.filter(s=>s.startTime.slice(0,10)===today).reduce((a,s)=>a+s.duration,0);
-  document.getElementById('progressText').textContent = `${fmtShort(sec*1000)} / ${fmtShort(goal*1000)}`;
-  const pct = goal>0 ? Math.min(100,Math.round((sec/goal)*100)) : 0;
-  const bar = document.getElementById('progressBar');
-  bar.style.width = pct+'%'; bar.classList.toggle('done', pct>=100);
-  if (!phaseStart && !timerInterval) updateRing(sec*1000);
-  if (!phaseStart && !timerInterval) document.getElementById('timerRing').style.strokeDashoffset = RING_CIRCUMFERENCE * (1 - (goal>0?Math.min(sec/goal,1):0));
-}
-
-// ── History ──
-function renderHistory() {
-  const data = load(), panel = document.getElementById('historyPanel');
-  if (data.sessions.length === 0) {
-    panel.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">还没有学习记录</div><div class="empty-text" style="font-size:0.75rem;margin-top:4px">点击上方「开卷」开始计时</div></div>';
-    return;
-  }
-  const sorted = [...data.sessions].sort((a,b)=>new Date(b.startTime)-new Date(a.startTime));
-  const groups = {}; sorted.forEach(s=>{const d=s.startTime.slice(0,10);(groups[d]=groups[d]||[]).push(s);});
-  const todayStr = new Date().toISOString().slice(0,10);
-  panel.innerHTML = Object.entries(groups).map(([date,sessions])=>`
-    <div class="day-group">
-      <div class="day-head${date===todayStr?' today':''}">${date===todayStr?'今天':date} · ${sessions.reduce((a,s)=>a+s.duration,0)>3600?fmtShort(sessions.reduce((a,s)=>a+s.duration,0)*1000):''}</div>
-      ${sessions.map(s=>`
-        <div class="session-row">
-          <div class="dot" style="background:${getColor(s.subject)}"></div>
-          <div class="session-meta">
-            <div class="session-name">${esc(s.subject)}</div>
-            <div class="session-range">${fmtTime(s.startTime)} - ${fmtTime(s.endTime)}</div>
-          </div>
-          <span class="session-dur">${fmtShort(s.duration*1000)}</span>
-          <button class="btn-del" data-id="${s.id}">×</button>
-        </div>
-      `).join('')}
-    </div>
-  `).join('');
-  panel.querySelectorAll('.btn-del').forEach(b=>b.addEventListener('click',()=>{
-    const d=load();const sid=b.dataset.id;d.sessions=d.sessions.filter(s=>s.id!==sid);save(d);deleteRemoteSession(sid);refreshAll();showToast('🗑 记录已删除');
-  }));
-}
-
-// ── Stats ──
-function renderStats() {
-  const data = load(), today = new Date();
-  const ts = today.toISOString().slice(0,10);
-  const dayOfWeek = today.getDay()||7;
-  const ws = new Date(today); ws.setDate(today.getDate()-(dayOfWeek-1));
-  const ms = ts.slice(0,7);
-  const tSec = sum(data.sessions.filter(s=>s.startTime.slice(0,10)===ts));
-  const wSec = sum(data.sessions.filter(s=>s.startTime>=ws.toISOString().slice(0,10)));
-  const mSec = sum(data.sessions.filter(s=>s.startTime.slice(0,7)===ms));
-  document.getElementById('statToday').textContent = fmtShort(tSec*1000);
-  document.getElementById('statWeek').textContent = fmtShort(wSec*1000);
-  document.getElementById('statMonth').textContent = fmtShort(mSec*1000);
-  drawChart(data);
-}
-function sum(arr) { return arr.reduce((a,s)=>a+s.duration,0); }
-
-function drawChart(data) {
-  const canvas = document.getElementById('chartCanvas');
-  const dpr = window.devicePixelRatio||1;
-  const rect = canvas.parentElement.getBoundingClientRect();
-  const w = rect.width, h = 190;
-  canvas.width = w*dpr; canvas.height = h*dpr; canvas.style.width=w+'px'; canvas.style.height=h+'px';
-  const ctx = canvas.getContext('2d'); ctx.scale(dpr,dpr); ctx.clearRect(0,0,w,h);
-
-  const days = [], today = new Date();
-  for(let i=6;i>=0;i--) {
-    const d = new Date(today); d.setDate(today.getDate()-i);
-    const ds = d.toISOString().slice(0,10);
-    days.push({label:i===0?'今天':`周${'日一二三四五六'[d.getDay()]}`,dateStr:ds,count:0});
-  }
-  data.sessions.forEach(s=>{if(!s.created_at)s.created_at=s.startTime;const ds=(s.created_at||s.startTime).slice(0,10);const day=days.find(d=>d.dateStr===ds);if(day)day.count+=s.duration;});
-  const maxSec = Math.max(...days.map(d=>d.count),3600);
-  const pad={top:8,right:12,bottom:24,left:34};
-  const cw=w-pad.left-pad.right, ch=h-pad.top-pad.bottom;
-  const gap=6, bw=(cw-gap*6)/7;
-
-  ctx.strokeStyle='#e2e8f0';ctx.lineWidth=1;
-  for(let i=0;i<=4;i++) {
-    const y=pad.top+(ch/4)*i;ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(w-pad.right,y);ctx.stroke();
-    ctx.fillStyle='#64748b';ctx.font='10px sans-serif';ctx.textAlign='right';
-    ctx.fillText(fmtShort(((maxSec/4)*(4-i))*1000),pad.left-6,y+3);
-  }
-  days.forEach((day,i)=>{
-    const barH=day.count>0?Math.max((day.count/maxSec)*ch,2):0;
-    const x=pad.left+i*(bw+gap), y=pad.top+ch-barH, r=Math.min(5,bw/2);
-    if(day.count>0){const g=ctx.createLinearGradient(x,y,x,pad.top+ch);g.addColorStop(0,'#059669');g.addColorStop(1,'#10b981');ctx.fillStyle=g;}
-    else ctx.fillStyle='#e8f5ee';
-    ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+bw-r,y);ctx.quadraticCurveTo(x+bw,y,x+bw,y+r);ctx.lineTo(x+bw,pad.top+ch);ctx.lineTo(x,pad.top+ch);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.fill();
-    if(day.count>=300){ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(fmtShort(day.count*1000),x+bw/2,y+15);}
-    ctx.fillStyle='#64748b';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText(day.label,x+bw/2,pad.top+ch+16);
   });
+  save(data);
+  saveRemote(data.sessions[data.sessions.length - 1]);
+  pausedMs = 0; phaseStart = null; tick(); setTimerUI(false); refreshTimer(); refreshAll();
+  toast('✅ 学习记录已保存');
+}
+function reset() {
+  clearInterval(timerInterval); timerInterval = null; pausedMs = 0; phaseStart = null; tick(); setTimerUI(false);
 }
 
-// ── Goal ──
-function loadGoal() { const d=load(),g=d.dailyGoal;document.getElementById('goalHours').value=Math.floor(g/3600);document.getElementById('goalMinutes').value=Math.floor((g%3600)/60); }
-document.getElementById('btnSaveGoal').addEventListener('click',()=>{
-  const h=parseInt(document.getElementById('goalHours').value)||0,m=parseInt(document.getElementById('goalMinutes').value)||0;
-  const d=load();d.dailyGoal=h*3600+m*60;save(d);updateProgress();updateRing(getMs());showToast('🎯 目标已更新');
+document.getElementById('btnStart').addEventListener('click', start);
+document.getElementById('btnPause').addEventListener('click', pause);
+document.getElementById('btnStop').addEventListener('click', stop);
+document.getElementById('btnReset').addEventListener('click', reset);
+
+function refreshTimer() {
+  const data = load(), today = todayStr();
+  const sec = data.sessions.filter(s => s.startTime.slice(0, 10) === today).reduce((a, s) => a + s.duration, 0);
+  document.getElementById('todayStudy').textContent = fmtShort(sec * 1000);
+  const pct = Math.min(100, (sec / (8 * 3600)) * 100);
+  document.getElementById('studyBar').style.width = pct + '%';
+
+  // Recent sessions
+  const sorted = [...data.sessions].sort((a, b) => new Date(b.startTime) - new Date(a.startTime)).slice(0, 10);
+  const list = document.getElementById('recentList');
+  if (!sorted.length) {
+    list.innerHTML = '<div class="empty">还没有学习记录</div>';
+  } else {
+    const SUBJECT_COLORS = ['#059669','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899'];
+    const colorCache = {};
+    function getColor(s) {
+      if (!colorCache[s]) { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i); colorCache[s] = SUBJECT_COLORS[Math.abs(h) % SUBJECT_COLORS.length]; }
+      return colorCache[s];
+    }
+    list.innerHTML = sorted.map(s => `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;margin-bottom:2px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${getColor(s.subject)};flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.85rem;font-weight:700">${esc(s.subject)}</div>
+          <div style="font-size:0.7rem;color:var(--muted)">${new Date(s.startTime).toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+        <span style="font-size:0.85rem;font-weight:800;color:var(--green)">${fmtShort(s.duration * 1000)}</span>
+        <button style="background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:1rem;padding:2px 6px" data-del="${s.id}">×</button>
+      </div>
+    `).join('');
+    list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+      const d = load(); d.sessions = d.sessions.filter(s => s.id !== b.dataset.del); save(d);
+      deleteRemoteSession(b.dataset.del);
+      refreshTimer(); refreshAll(); toast('已删除');
+    }));
+  }
+}
+
+// ── 888 Plan ──
+function refresh888() {
+  const data = load(), today = todayStr();
+  const studySec = data.sessions.filter(s => s.startTime.slice(0, 10) === today).reduce((a, s) => a + s.duration, 0);
+
+  // Sleep from log
+  const sleepEntry = data.sleepLog.find(s => s.date === today);
+  const sleepH = sleepEntry ? sleepEntry.hours : 0;
+
+  // Leisure from log
+  const leisureEntry = data.leisureLog.find(l => l.date === today);
+  const leisureH = leisureEntry ? leisureEntry.hours : 0;
+
+  // Study from timer sessions
+  const studyH = studySec / 3600;
+
+  document.getElementById('barSleep').style.width = Math.min(100, (sleepH / 8) * 100) + '%';
+  document.getElementById('valSleep').textContent = sleepH.toFixed(1) + 'h / 8h';
+  document.getElementById('barStudy888').style.width = Math.min(100, (studyH / 8) * 100) + '%';
+  document.getElementById('valStudy888').textContent = studyH.toFixed(1) + 'h / 8h';
+  document.getElementById('barLeisure').style.width = Math.min(100, (leisureH / 8) * 100) + '%';
+  document.getElementById('valLeisure').textContent = leisureH.toFixed(1) + 'h / 8h';
+
+  document.getElementById('sumSleep').textContent = sleepH.toFixed(1) + 'h';
+  document.getElementById('sumStudy').textContent = studyH.toFixed(1) + 'h';
+  document.getElementById('sumLeisure').textContent = leisureH.toFixed(1) + 'h';
+
+  const all8 = sleepH >= 8 && studyH >= 8 && leisureH >= 8;
+  const any = sleepH > 0 || studyH > 0 || leisureH > 0;
+  document.getElementById('summaryMsg').textContent = all8 ? '✨ 今日 888 全部达标！' : any ? '继续加油，你可以的 💪' : '今天也要加油哦 💪';
+  document.getElementById('daySummary').textContent = any ? `😴${sleepH.toFixed(0)}h 📖${studyH.toFixed(0)}h 🎮${leisureH.toFixed(0)}h` : '';
+
+  // Sleep calc
+  calcSleep();
+}
+
+function calcSleep() {
+  const s = document.getElementById('sleepStart').value;
+  const e = document.getElementById('sleepEnd').value;
+  if (!s || !e) { document.getElementById('sleepCalc').textContent = ''; return; }
+  const [sh, sm] = s.split(':').map(Number), [eh, em] = e.split(':').map(Number);
+  let startMins = sh * 60 + sm, endMins = eh * 60 + em;
+  if (endMins <= startMins) endMins += 24 * 60;
+  const totalMins = endMins - startMins, h = Math.floor(totalMins / 60), m = totalMins % 60;
+  let cls = 'good', label = '良好';
+  if (totalMins < 360) { cls = 'bad'; label = '不足'; }
+  else if (totalMins < 420) { cls = 'warn'; label = '偏少'; }
+  document.getElementById('sleepCalc').innerHTML = `预计睡眠 <b>${h}h ${m}m</b> <span class="sleep-badge ${cls}">${label}</span>`;
+}
+
+document.getElementById('sleepStart').addEventListener('change', calcSleep);
+document.getElementById('sleepEnd').addEventListener('change', calcSleep);
+
+document.getElementById('btnSaveSleep').addEventListener('click', () => {
+  const s = document.getElementById('sleepStart').value;
+  const e = document.getElementById('sleepEnd').value;
+  if (!s || !e) return toast('请选择入睡和起床时间');
+  const [sh, sm] = s.split(':').map(Number), [eh, em] = e.split(':').map(Number);
+  let mins = (eh * 60 + em) - (sh * 60 + sm);
+  if (mins <= 0) mins += 24 * 60;
+  const data = load(), today = todayStr();
+  const idx = data.sleepLog.findIndex(x => x.date === today);
+  const entry = { date: today, start: s, end: e, hours: mins / 60 };
+  if (idx >= 0) data.sleepLog[idx] = entry; else data.sleepLog.push(entry);
+  save(data); refresh888(); refreshAll();
+  toast('😴 睡眠时间已保存');
 });
 
-// ── Tabs ──
-document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');
-  const isH=t.dataset.tab==='history';
-  document.getElementById('historyPanel').style.display=isH?'':'none';
-  document.getElementById('statsPanel').style.display=isH?'none':'';
-  if(!isH)renderStats();
-}));
+document.getElementById('btnSaveLeisure').addEventListener('click', () => {
+  const h = parseInt(document.getElementById('leisureHours').value) || 0;
+  const m = parseInt(document.getElementById('leisureMinutes').value) || 0;
+  const total = h + m / 60;
+  if (total === 0) return toast('请输入休闲时间');
+  const data = load(), today = todayStr();
+  const idx = data.leisureLog.findIndex(x => x.date === today);
+  const entry = { date: today, hours: total };
+  if (idx >= 0) data.leisureLog[idx] = entry; else data.leisureLog.push(entry);
+  save(data); refresh888(); refreshAll();
+  toast('🎮 休闲时间已保存');
+});
 
-// ── Helpers ──
-function esc(s){const e=document.createElement('span');e.textContent=s;return e.innerHTML;}
-function fmtTime(iso){return new Date(iso).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});}
+// ── Diary ──
+function refreshDiary() {
+  document.getElementById('diaryDate').textContent = new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
+  const data = load(), today = todayStr();
+  const todayEntry = data.diary.find(d => d.date === today);
+  document.getElementById('diaryText').value = todayEntry ? todayEntry.text : '';
 
-// ── Bindings ──
-document.getElementById('btnStart').addEventListener('click',start);
-document.getElementById('btnPause').addEventListener('click',pause);
-document.getElementById('btnStop').addEventListener('click',stop);
-document.getElementById('btnReset').addEventListener('click',reset);
-document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.code==='Space'){e.preventDefault();start();}if(e.code==='KeyP'){e.preventDefault();pause();}if(e.code==='KeyS'&&!e.ctrlKey){e.preventDefault();stop();}});
+  const list = document.getElementById('diaryList');
+  const sorted = [...data.diary].sort((a, b) => b.date.localeCompare(a.date));
+  if (!sorted.length) {
+    list.innerHTML = '<div class="card"><div class="empty">📝 还没有日记</div></div>';
+  } else {
+    list.innerHTML = sorted.map(d => `
+      <div class="card diary-item">
+        <button class="diary-item-del" data-del="${d.id}">×</button>
+        <div class="diary-item-date">${d.date}</div>
+        <div class="diary-item-text">${esc(d.text)}</div>
+      </div>
+    `).join('');
+    list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+      const d2 = load(); d2.diary = d2.diary.filter(x => x.id !== b.dataset.del); save(d2);
+      refreshDiary(); refreshAll(); toast('日记已删除');
+    }));
+  }
+}
 
-function refreshAll(){updateProgress();renderHistory();}
-refreshAll();loadGoal();
-window.addEventListener('resize',()=>{if(document.getElementById('statsPanel').style.display!=='none')drawChart(load());});
+document.getElementById('btnSaveDiary').addEventListener('click', () => {
+  const text = document.getElementById('diaryText').value.trim();
+  if (!text) return toast('请输入日记内容');
+  const data = load(), today = todayStr();
+  const idx = data.diary.findIndex(d => d.date === today);
+  if (idx >= 0) {
+    data.diary[idx].text = text;
+  } else {
+    data.diary.push({
+      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36),
+      date: today,
+      text: text
+    });
+  }
+  save(data); refreshDiary(); refreshAll();
+  toast('✅ 日记已保存');
+});
 
-// ── Cloud sync ──
+// ── Profile ──
+function refreshProfile() {
+  const data = load();
+  const totalStudy = data.sessions.reduce((a, s) => a + s.duration, 0);
+  document.getElementById('statTotalStudy').textContent = fmtShort(totalStudy * 1000);
+  document.getElementById('statTotalSessions').textContent = data.sessions.length + ' 次';
+  document.getElementById('statTotalDiary').textContent = data.diary.length + ' 篇';
+
+  let starDays = 0;
+  const days = {};
+  data.sessions.forEach(s => { const d = s.startTime.slice(0, 10); days[d] = days[d] || { study: 0, sleep: 0, leisure: 0 }; days[d].study += s.duration; });
+  data.sleepLog.forEach(s => { days[s.date] = days[s.date] || { study: 0, sleep: 0, leisure: 0 }; days[s.date].sleep = s.hours; });
+  data.leisureLog.forEach(l => { days[l.date] = days[l.date] || { study: 0, sleep: 0, leisure: 0 }; days[l.date].leisure = l.hours; });
+  Object.values(days).forEach(d => { if (d.study / 3600 >= 8 && d.sleep >= 8 && d.leisure >= 8) starDays++; });
+  document.getElementById('stat888Days').textContent = starDays + ' 天';
+}
+
+document.getElementById('btnLogout').addEventListener('click', () => {
+  sessionStorage.clear();
+  location.href = 'login.html';
+});
+
+// ── Global ──
+function esc(s) { const e = document.createElement('span'); e.textContent = s; return e.innerHTML; }
+function refreshAll() {
+  refreshTimer(); refresh888(); refreshDiary();
+  const today = todayStr();
+  const data = load();
+  const sleepH = (data.sleepLog.find(s => s.date === today) || {}).hours || 0;
+  const studyH = data.sessions.filter(s => s.startTime.slice(0, 10) === today).reduce((a, s) => a + s.duration, 0) / 3600;
+  const leisureH = (data.leisureLog.find(l => l.date === today) || {}).hours || 0;
+  document.getElementById('daySummary').textContent = `😴${sleepH.toFixed(0)}h 📖${studyH.toFixed(0)}h 🎮${leisureH.toFixed(0)}h`;
+}
+
+// Init
+refreshAll();
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space') { e.preventDefault(); start(); }
+  if (e.code === 'KeyP') { e.preventDefault(); pause(); }
+});
+
+// ── Cloud Sync ──
 (function() {
-  const SUPABASE_URL='https://fdldkejfkvcymlzcmeub.supabase.co';
-  const SUPABASE_KEY='sb_publishable_0r9JoiUqOggGX7Cum1gjtQ_WEkBE2Sp';
+  const SUPABASE_URL = 'https://fdldkejfkvcymlzcmeub.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_0r9JoiUqOggGX7Cum1gjtQ_WEkBE2Sp';
 
-  window.saveRemoteSession = async function(session) {
+  window.saveRemote = async function(session) {
     try {
       await fetch(SUPABASE_URL + '/rest/v1/sessions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          id: session.id,
-          user_id: session.user_id,
-          subject: session.subject,
-          start_time: session.startTime,
-          end_time: session.endTime,
-          duration: session.duration
-        })
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ id: session.id, user_id: session.user_id, subject: session.subject, start_time: session.startTime, end_time: session.endTime, duration: session.duration })
       });
     } catch(e) { console.error('[sync] save error:', e); }
   };
@@ -612,54 +733,35 @@ window.addEventListener('resize',()=>{if(document.getElementById('statsPanel').s
     } catch(e) { console.error('[sync] delete error:', e); }
   };
 
-  async function fetchRemoteSessions() {
-    try {
-      var res = await fetch(
-        SUPABASE_URL + '/rest/v1/sessions?user_id=eq.' + currentUser.id + '&select=*&order=start_time.desc&limit=500',
-        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
-      );
-      if (!res.ok) return [];
-      var rows = await res.json();
-      return rows.map(function(r) {
-        return {
-          id: r.id,
-          subject: r.subject,
-          startTime: r.start_time,
-          endTime: r.end_time,
-          duration: r.duration,
-          user_id: r.user_id,
-          user_name: currentUser.name
-        };
-      });
-    } catch(e) { console.error('[sync] fetch error:', e); return []; }
-  }
-
-  // Sync on load
-  fetchRemoteSessions().then(function(remote) {
+  fetch(SUPABASE_URL + '/rest/v1/sessions?user_id=eq.' + currentUser.id + '&select=*&order=start_time.desc&limit=500', {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+  }).then(res => res.json()).then(remote => {
     if (!remote.length) return;
-    var data = load();
-    var localIds = {};
-    data.sessions.forEach(function(s) { localIds[s.id] = true; });
-    var added = 0;
-    remote.forEach(function(r) {
-      if (!localIds[r.id]) { data.sessions.push(r); added++; }
+    const data = load();
+    const localIds = {};
+    data.sessions.forEach(s => { localIds[s.id] = true; });
+    let added = 0;
+    remote.forEach(r => {
+      if (!localIds[r.id]) { data.sessions.push({ id: r.id, subject: r.subject, startTime: r.start_time, endTime: r.end_time, duration: r.duration, user_id: r.user_id, user_name: currentUser.name }); added++; }
     });
-    if (added > 0) {
-      save(data);
-      console.log('[sync] added ' + added + ' sessions from cloud');
-      refreshAll();
-    }
+    if (added > 0) { save(data); refreshAll(); }
   });
 })();
 
-// ── Analytics ──
+// ── 9 PM Auto Summary ──
 (function() {
-  const SUPABASE_URL='https://fdldkejfkvcymlzcmeub.supabase.co';
-  const SUPABASE_KEY='sb_publishable_0r9JoiUqOggGX7Cum1gjtQ_WEkBE2Sp';
-  let vid=localStorage.getItem('svid');
-  if(!vid){vid=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2,10);localStorage.setItem('svid',vid);}
-  const ua=navigator.userAgent,isM=/Mobi|Android|iPhone/i.test(ua),isT=/iPad|Tablet/i.test(ua)||(isM&&window.innerWidth>768);
-  fetch(SUPABASE_URL+'/rest/v1/visits',{method:'POST',headers:{'Content-Type':'application/json',apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,Prefer:'return=minimal'},body:JSON.stringify({page:window.location.pathname,referrer:document.referrer||'直接访问',user_agent:(isT?'平板':isM?'手机':'电脑')+' | '+(ua.match(/Chrome|Firefox|Safari|Edge\/\d+/)?.[0]||'其他浏览器'),screen_size:window.innerWidth+'x'+window.innerHeight,visitor_id:vid,user_id:currentUser?currentUser.id:null})}).catch(()=>{});
+  function check9pm() {
+    const now = new Date();
+    if (now.getHours() === 21 && now.getMinutes() === 0) {
+      const data = load(), today = todayStr();
+      const studyH = data.sessions.filter(s => s.startTime.slice(0, 10) === today).reduce((a, s) => a + s.duration, 0) / 3600;
+      const sleepH = (data.sleepLog.find(s => s.date === today) || {}).hours || 0;
+      const leisureH = (data.leisureLog.find(l => l.date === today) || {}).hours || 0;
+      const all8 = sleepH >= 8 && studyH >= 8 && leisureH >= 8;
+      toast('🕘 9点结算：' + (all8 ? '🎉 888 全部达标！' : '还有进步空间，明天继续加油！'));
+    }
+  }
+  setInterval(check9pm, 60000);
 })();
 </script>
 </body>
