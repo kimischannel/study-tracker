@@ -155,7 +155,7 @@ $('btnToggle').addEventListener('click', function() {
   $('modeSub').textContent = mode === 'login' ? '使用手机号登录学习计时' : '创建账号开始记录学习';
   $('btnSubmit').textContent = mode === 'login' ? '登 录' : '注 册';
   $('btnToggle').textContent = mode === 'login' ? '还没有账号？点此注册' : '已有账号？点此登录';
-  $('extraFields').style.display = mode === 'register' ? '' : 'none';
+  $('extraFields').style.display = mode === 'register' ? 'block' : 'none';
   $('errorMsg').style.display = 'none';
   $('successMsg').style.display = 'none';
 });
