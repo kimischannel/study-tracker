@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>学习时间记录 — Kai 助手</title>
+<title>学习时间记录</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -11,9 +11,9 @@
   --card: #ffffff;
   --text: #1e1e2e;
   --muted: #9098a5;
-  --accent: #5b6af0;
-  --accent-light: #eef0ff;
-  --accent-glow: rgba(91,106,240,0.15);
+  --accent: #2ecc71;
+  --accent-light: #eafaf1;
+  --accent-glow: rgba(46,204,113,0.2);
   --danger: #e5484d;
   --border: #eaecf0;
   --success: #30a46c;
@@ -27,7 +27,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   background: var(--bg);
-  background-image: radial-gradient(ellipse at 50% 0%, #e8ecfb 0%, transparent 60%);
+  background-image: radial-gradient(ellipse at 50% 0%, #e6f9ee 0%, transparent 60%);
   color: var(--text);
   min-height: 100vh;
   display: flex;
@@ -81,7 +81,7 @@ body {
 .btn:active { transform: scale(0.96); }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 .btn-start { background: var(--accent); color: #fff; box-shadow: 0 2px 8px var(--accent-glow); }
-.btn-start:hover:not(:disabled) { background: #4a5ad9; box-shadow: 0 4px 14px rgba(91,106,240,0.3); }
+.btn-start:hover:not(:disabled) { background: #27ae60; box-shadow: 0 4px 14px rgba(46,204,113,0.35); }
 .btn-pause { background: var(--warn); color: #fff; }
 .btn-pause:hover { background: #d98c00; }
 .btn-stop { background: #fff; color: var(--danger); border: 1.5px solid var(--danger); }
@@ -97,7 +97,7 @@ body {
 .progress-bar-outer { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
 .progress-bar-inner {
   height: 100%; border-radius: 4px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s;
-  background: linear-gradient(90deg, var(--accent), #8b5cf6);
+  background: linear-gradient(90deg, var(--accent), #27ae60);
 }
 .progress-bar-inner.done { background: linear-gradient(90deg, var(--success), #34d399); }
 
@@ -115,7 +115,7 @@ body {
   font-size: 13px; font-weight: 600; padding: 8px 18px; background: var(--accent);
   color: #fff; border: none; border-radius: 20px; cursor: pointer; transition: all 0.2s;
 }
-.btn-goal-save:hover { background: #4a5ad9; }
+.btn-goal-save:hover { background: #27ae60; }
 .btn-goal-save:active { transform: scale(0.96); }
 
 /* Tabs */
@@ -183,7 +183,6 @@ body {
 <div class="app">
   <div class="header">
     <h1>学习计时</h1>
-    <span>Kai 助手</span>
   </div>
 
   <!-- Timer -->
@@ -198,7 +197,7 @@ body {
       <div class="timer-display" id="timerDisplay">00:00:00</div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-start" id="btnStart">▶ 开始</button>
+      <button class="btn btn-start" id="btnStart">▶ 开卷</button>
       <button class="btn btn-pause" id="btnPause" style="display:none">⏸ 暂停</button>
       <button class="btn btn-stop" id="btnStop" disabled>⏹ 停止</button>
       <button class="btn btn-reset" id="btnReset">↺ 重置</button>
@@ -446,7 +445,7 @@ function renderHistory() {
       <div class="no-data">
         <div class="no-data-icon">📝</div>
         <div class="no-data-text">还没有学习记录</div>
-        <div class="no-data-text" style="font-size:12px;margin-top:4px">点击上方「开始」计时吧</div>
+        <div class="no-data-text" style="font-size:12px;margin-top:4px">点击上方「开卷」计时吧</div>
       </div>`;
     return;
   }
@@ -574,11 +573,11 @@ function drawChart(data) {
 
     if (day.isToday) {
       const grad = ctx.createLinearGradient(x, y, x, pad.top + chartH);
-      grad.addColorStop(0, '#5b6af0');
-      grad.addColorStop(1, '#8b5cf6');
+      grad.addColorStop(0, '#2ecc71');
+      grad.addColorStop(1, '#27ae60');
       ctx.fillStyle = grad;
     } else {
-      ctx.fillStyle = '#dde0f0';
+      ctx.fillStyle = '#d5f0e0';
     }
 
     ctx.beginPath();
@@ -593,7 +592,7 @@ function drawChart(data) {
 
     // Value on bar
     if (day.seconds >= 300) {
-      ctx.fillStyle = day.isToday ? '#fff' : '#5b6af0';
+      ctx.fillStyle = day.isToday ? '#fff' : '#2ecc71';
       ctx.font = 'bold 10px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(formatDurationShort(day.seconds * 1000), x + barW / 2, y + 15);
